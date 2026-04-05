@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Smart Recruit AI
 
-## Getting Started
+An AI-driven Recruitment SaaS platform designed to automate and streamline the hiring process. This project focuses on solving the "Resume Overload" problem for recruiters by using AI to rank candidates based on job requirements.
 
-First, run the development server:
+Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+AI-Powered Resume Screening: Integrates OpenAI to analyze resumes and generate compatibility scores.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Smart Candidate Ranking: Automatically sorts applicants by their AI match score, helping recruiters find top talent faster.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Dual-Role Dashboards: Separate user experiences for Recruiters (job management) and Candidates (application tracking).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Secure Authentication: Seamless Google Login integration using NextAuth.js.
 
-## Learn More
+Payment Integration: Stripe support for featured job listings and premium recruiter tools.
 
-To learn more about Next.js, take a look at the following resources:
+🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Framework: Next.js 15 (App Router)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Language: TypeScript (for type safety and robust code)
 
-## Deploy on Vercel
+Database: MongoDB with Mongoose ODM
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Styling: Tailwind CSS & Shadcn UI
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Validation: Zod (for bulletproof API request validation)
+
+📂 Project Architecture
+
+The project follows a clean MVC (Model-View-Controller) pattern within the src directory to ensure scalability:
+
+src/models: Mongoose schemas for Users, Jobs, and Applications.
+
+src/controllers: Business logic and AI-processing routines.
+
+src/validations: Request schemas for data integrity.
+
+src/lib: Database connections and utility helpers.
+
+Why this is Professional:
+
+Clear Problem Statement: You mentioned why the project exists (solving "Resume Overload").
+
+Standard Terminology: Uses terms like "Scalability," "Type Safety," and "ODM."
+
+Architecture Highlight: Shows that you didn't just write code, you designed it.
