@@ -1,34 +1,31 @@
 import { v2 as cloudinary } from "cloudinary"
-import fs from "fs"
 
-// Cloudinary configure karo — .env se values lo
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
   api_key: process.env.CLOUDINARY_API_KEY!,
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 })
 
-// File upload karne ka function
-const uploadOnCloudinary = async (localFilePath: string) => {
+// Buffer se directly upload karo
+const uploadOnCloudinary = async (
+  buffer: Buffer,
+  filename: string
+): Promise<string | null> => {
   try {
-    // Agar file path nahi hai toh null return karo
-    if (!localFilePath) return null
+    // Buffer ko base64 mein convert karo
+    const base64 = buffer.toString("base64")
+    const dataUri = `data:application/pdf;base64,${base64}`
 
-    // Cloudinary pe upload karo
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto", // Image, PDF, sab handle karega
+    const response = await cloudinary.uploader.upload(dataUri, {
+      resource_type: "auto",
+      public_id: `resumes/${Date.now()}-${filename}`,
+      folder: "recruitment",
     })
 
-    // Upload successful — local file delete karo
-    fs.unlinkSync(localFilePath)
-
-    return response // response.secure_url mein file ka URL hoga
+    return response.secure_url // ✅ URL return karo
 
   } catch (error) {
-    // Upload fail hua — phir bhi local file delete karo
-    if (fs.existsSync(localFilePath)) {
-      fs.unlinkSync(localFilePath)
-    }
+    console.error("Cloudinary upload error:", error)
     return null
   }
 }
