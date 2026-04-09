@@ -5,18 +5,22 @@ import { ApiResponse } from "../utils/ApiResponse"
 import { asyncHandler } from "../utils/asyncHandler"
 import connectDB from "../lib/db"
 import jwt from "jsonwebtoken"
+import { registerSchema, loginSchema } from "../lib/validations"
 
 // REGISTER
 
 export const register = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  const { name, email, password, role } = await req.json()
+  // Yeh lagao ✅
+const body = await req.json()
 
-  // Validation
-  if (!name || !email || !password) {
-    throw new ApiError(400, "Name, email and password are required!")
-  }
+const result = registerSchema.safeParse(body)
+if (!result.success) {
+  throw new ApiError(400, result.error.issues[0].message)
+}
+
+const { name, email, password, role } = result.data
 
   // Email already exist?
   const existingUser = await User.findOne({ email })
@@ -47,12 +51,15 @@ export const register = asyncHandler(async (req: NextRequest) => {
 export const login = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  const { email, password } = await req.json()
+  // Yeh lagao ✅
+const body = await req.json()
 
-  // Validation
-  if (!email || !password) {
-    throw new ApiError(400, "Email and password are required!")
-  }
+const result = loginSchema.safeParse(body)
+if (!result.success) {
+  throw new ApiError(400, result.error.issues[0].message)
+}
+
+const { email, password } = result.data
 
   // User dhundo
   const user = await User.findOne({ email })
