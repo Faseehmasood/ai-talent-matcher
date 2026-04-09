@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse"
 import { asyncHandler } from "../utils/asyncHandler"
 import { verifyJWT } from "../middleware/auth"
 import connectDB from "../lib/db"
+import { createJobSchema, updateJobSchema } from "../lib/validations"
 
 // ==================
 // CREATE JOB — Sirf HR
@@ -18,32 +19,18 @@ export const createJob = asyncHandler(async (req: NextRequest) => {
     throw new ApiError(403, "Only HR can create jobs!")
   }
 
-  const {
-    title,
-    description,
-    company,
-    location,
-    salary,
-    skills,
-    jobType,
-  } = await req.json()
+  // Yeh lagao ✅
+const body = await req.json()
 
-  // Validation
-  if (!title || !description || !company || !location || !skills || !jobType) {
-    throw new ApiError(400, "All fields are required!")
-  }
+const result = createJobSchema.safeParse(body)
+if (!result.success) {
+  throw new ApiError(400, result.error.issues[0].message)
+}
 
-  // Job banao
-  const job = await Job.create({
-    title,
-    description,
-    company,
-    location,
-    salary,
-    skills,
-    jobType,
-    postedBy: user._id, // HR ka ID
-  })
+const job = await Job.create({
+  ...result.data,
+  postedBy: user._id,
+})
 
   return NextResponse.json(
     new ApiResponse(201, job, "Job created successfully!"),
@@ -156,7 +143,16 @@ export const updateJob = asyncHandler(async (req: NextRequest, context?: { param
   }
 
   const jobId = context?.params?.id
-  const updates = await req.json()
+  // Yeh lagao ✅
+const body = await req.json()
+
+const result = updateJobSchema.safeParse(body)
+if (!result.success) {
+  throw new ApiError(400, result.error.issues[0].message)
+}
+
+// Update line mein:
+{ $set: result.data }
 
   // Job dhundo
   const job = await Job.findById(jobId)
@@ -175,7 +171,7 @@ export const updateJob = asyncHandler(async (req: NextRequest, context?: { param
   // Update karo
   const updatedJob = await Job.findByIdAndUpdate(
     jobId,
-    { $set: updates },
+    { $set: result.data },
     { new: true } // Updated document return karo
   )
 
