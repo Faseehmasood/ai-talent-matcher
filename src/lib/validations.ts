@@ -57,6 +57,7 @@ export const createJobSchema = z.object({
   skills: z
     .array(z.string())
     .min(1, "At least one skill is required!"),
+    status: z.enum(["active", "closed", "draft"]).optional(),
   jobType: z.enum([
     "full-time",
     "part-time", 
