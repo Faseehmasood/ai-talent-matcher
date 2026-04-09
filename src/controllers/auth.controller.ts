@@ -12,7 +12,7 @@ import { registerSchema, loginSchema } from "../lib/validations"
 export const register = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  // Yeh lagao ✅
+  
 const body = await req.json()
 
 const result = registerSchema.safeParse(body)
