@@ -172,7 +172,7 @@ if (!result.success) {
   const updatedJob = await Job.findByIdAndUpdate(
     jobId,
     { $set: result.data },
-    { new: true } // Updated document return karo
+    { returnDocument: "after" } // Updated document return karo
   )
 
   return NextResponse.json(
@@ -181,9 +181,9 @@ if (!result.success) {
   )
 })
 
-// ==================
+
 // DELETE JOB — Sirf HR/Admin
-// ==================
+
 export const deleteJob = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
 
