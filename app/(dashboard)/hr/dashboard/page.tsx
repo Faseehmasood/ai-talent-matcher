@@ -1,6 +1,7 @@
 import { StatsCard } from "@/components/dashboard/StatsCard"
 import { Chart } from "@/components/dashboard/Chart"
 import { Schedule } from "@/components/dashboard/Schedule"
+import { RecentApplications } from "@/components/dashboard/RecentApplications"
 import { Briefcase, Users, Eye } from "lucide-react"
 
 export default function HRDashboardPage() {
@@ -42,6 +43,9 @@ export default function HRDashboardPage() {
           <Schedule />
         </div>
       </div>
+
+      {/* Recent Applications */}
+      <RecentApplications />
 
     </div>
   )

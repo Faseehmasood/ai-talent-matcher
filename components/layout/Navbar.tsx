@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Plus, Upload } from "lucide-react"
+import { Bell, Plus, Upload, Search, UserPlus, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,11 +13,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation"
+
+function useRole() {
+  const pathname = usePathname()
+  if (pathname.startsWith("/candidate")) return "candidate"
+  if (pathname.startsWith("/admin")) return "admin"
+  return "hr"
+}
 
 export function Navbar() {
+  const role = useRole()
+
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
-      
+
       {/* Left — Sidebar Trigger + Search */}
       <div className="flex items-center gap-4">
         <SidebarTrigger />
@@ -29,19 +39,44 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Right — Buttons + Profile */}
+      {/* Right — Role Based Buttons + Profile */}
       <div className="flex items-center gap-3">
-        {/* Import Button */}
-        <Button variant="outline" size="sm" className="gap-2">
-          <Upload className="w-4 h-4" />
-          Import
-        </Button>
 
-        {/* Create Job Button */}
-        <Button size="sm" className="gap-2">
-          <Plus className="w-4 h-4" />
-          Create Job
-        </Button>
+        {/* HR Buttons */}
+        {role === "hr" && (
+          <>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Upload className="w-4 h-4" />
+              Import
+            </Button>
+            <Button size="sm" className="gap-2">
+              <Plus className="w-4 h-4" />
+              Create Job
+            </Button>
+          </>
+        )}
+
+        {/* Candidate Buttons */}
+        {role === "candidate" && (
+          <Button size="sm" className="gap-2">
+            <Search className="w-4 h-4" />
+            Browse Jobs
+          </Button>
+        )}
+
+        {/* Admin Buttons */}
+        {role === "admin" && (
+          <>
+            <Button variant="outline" size="sm" className="gap-2">
+              <UserPlus className="w-4 h-4" />
+              Add User
+            </Button>
+            <Button size="sm" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </Button>
+          </>
+        )}
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">
@@ -55,11 +90,25 @@ export function Navbar() {
             <div className="flex items-center gap-2 cursor-pointer">
               <Avatar className="w-8 h-8">
                 <AvatarImage src="" />
-                <AvatarFallback>SW</AvatarFallback>
+                <AvatarFallback>
+                  {role === "hr" ? "HR" : role === "admin" ? "AD" : "CA"}
+                </AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="text-sm font-medium">Sophia Williams</p>
-                <p className="text-xs text-muted-foreground">sophia@gmail.com</p>
+                <p className="text-sm font-medium">
+                  {role === "hr"
+                    ? "HR Manager"
+                    : role === "admin"
+                    ? "Admin"
+                    : "Candidate"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {role === "hr"
+                    ? "hr@gmail.com"
+                    : role === "admin"
+                    ? "admin@gmail.com"
+                    : "candidate@gmail.com"}
+                </p>
               </div>
             </div>
           </DropdownMenuTrigger>
@@ -74,6 +123,7 @@ export function Navbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
       </div>
     </header>
   )

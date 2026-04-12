@@ -24,10 +24,14 @@ import {
   Settings,
   HelpCircle,
   CreditCard,
+  ClipboardList,
+  Search,
+  Shield,
+  BarChart,
 } from "lucide-react"
 
-// Menu Items
-const mainMenu = [
+// HR Menu
+const hrMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/hr/dashboard" },
   { title: "Open Hiring", icon: Briefcase, url: "/hr/jobs" },
   { title: "Candidates", icon: Users, url: "/hr/candidates" },
@@ -36,19 +40,59 @@ const mainMenu = [
   { title: "Documents", icon: FileText, url: "/hr/documents" },
 ]
 
-const jobManager = [
+const hrJobManager = [
   { title: "Offer Templates", icon: FileEdit, url: "/hr/offer-templates" },
   { title: "Email Templates", icon: Mail, url: "/hr/email-templates" },
 ]
 
-const preferences = [
-  { title: "Profile", icon: User, url: "/hr/profile" },
-  { title: "Settings", icon: Settings, url: "/hr/settings" },
-  { title: "Help Center", icon: HelpCircle, url: "/hr/help" },
-  { title: "Billing", icon: CreditCard, url: "/hr/billing" },
+// Candidate Menu
+const candidateMainMenu = [
+  { title: "Dashboard", icon: LayoutDashboard, url: "/candidate/dashboard" },
+  { title: "Browse Jobs", icon: Search, url: "/candidate/jobs" },
+  { title: "My Applications", icon: ClipboardList, url: "/candidate/applications" },
+  { title: "Schedule", icon: Calendar, url: "/candidate/schedule" },
+  { title: "Documents", icon: FileText, url: "/candidate/documents" },
 ]
 
+// Admin Menu
+const adminMainMenu = [
+  { title: "Dashboard", icon: LayoutDashboard, url: "/admin/dashboard" },
+  { title: "Users", icon: Users, url: "/admin/users" },
+  { title: "Jobs", icon: Briefcase, url: "/admin/jobs" },
+  { title: "Analytics", icon: BarChart, url: "/admin/analytics" },
+  { title: "Settings", icon: Shield, url: "/admin/settings" },
+]
+
+// Common Preferences
+const preferences = [
+  { title: "Profile", icon: User, url: "/profile" },
+  { title: "Settings", icon: Settings, url: "/settings" },
+  { title: "Help Center", icon: HelpCircle, url: "/help" },
+  { title: "Billing", icon: CreditCard, url: "/billing" },
+]
+
+// Role detect karo URL se
+import { usePathname } from "next/navigation"
+
+function useRole() {
+  const pathname = usePathname()
+  if (pathname.startsWith("/candidate")) return "candidate"
+  if (pathname.startsWith("/admin")) return "admin"
+  return "hr"
+}
+
 export function AppSidebar() {
+  const role = useRole()
+
+  const mainMenu =
+    role === "candidate"
+      ? candidateMainMenu
+      : role === "admin"
+      ? adminMainMenu
+      : hrMainMenu
+
+  const showJobManager = role === "hr"
+
   return (
     <Sidebar>
       {/* Logo */}
@@ -82,22 +126,24 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Job Manager */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Job Manager</SidebarGroupLabel>
-          <SidebarMenu>
-            {jobManager.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <a href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        {/* Job Manager — Sirf HR */}
+        {showJobManager && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Job Manager</SidebarGroupLabel>
+            <SidebarMenu>
+              {hrJobManager.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
 
         {/* Preferences */}
         <SidebarGroup>
