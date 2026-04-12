@@ -1,5 +1,6 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -71,18 +72,16 @@ const preferences = [
   { title: "Billing", icon: CreditCard, url: "/billing" },
 ]
 
-// Role detect karo URL se
-import { usePathname } from "next/navigation"
-
-function useRole() {
-  const pathname = usePathname()
-  if (pathname.startsWith("/candidate")) return "candidate"
-  if (pathname.startsWith("/admin")) return "admin"
-  return "hr"
-}
-
 export function AppSidebar() {
-  const role = useRole()
+  // Dono yahan lo!
+  const pathname = usePathname()
+
+  // Role detect karo
+  const role = pathname.startsWith("/candidate")
+    ? "candidate"
+    : pathname.startsWith("/admin")
+    ? "admin"
+    : "hr"
 
   const mainMenu =
     role === "candidate"
@@ -103,7 +102,9 @@ export function AppSidebar() {
           </div>
           <div>
             <p className="font-bold text-sm">TalentaSync</p>
-            <p className="text-xs text-muted-foreground">Your Recruitment Platform</p>
+            <p className="text-xs text-muted-foreground">
+              Your Recruitment Platform
+            </p>
           </div>
         </div>
       </SidebarHeader>
@@ -115,7 +116,10 @@ export function AppSidebar() {
           <SidebarMenu>
             {mainMenu.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                >
                   <a href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
@@ -133,7 +137,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {hrJobManager.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.url}
+                  >
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -151,7 +158,10 @@ export function AppSidebar() {
           <SidebarMenu>
             {preferences.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                >
                   <a href={item.url}>
                     <item.icon />
                     <span>{item.title}</span>

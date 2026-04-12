@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
+import { Sun, Moon } from "lucide-react"
 
 function useRole() {
   const pathname = usePathname()
@@ -24,6 +26,7 @@ function useRole() {
 
 export function Navbar() {
   const role = useRole()
+  const {theme,setTheme} = useTheme()
 
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
@@ -77,6 +80,19 @@ export function Navbar() {
             </Button>
           </>
         )}
+
+        {/* Theme Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5" />
+          ) : (
+            <Moon className="w-5 h-5" />
+          )}
+        </Button>
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">
