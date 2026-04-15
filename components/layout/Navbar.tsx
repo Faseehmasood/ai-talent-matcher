@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Plus, Upload, Search, UserPlus, Settings } from "lucide-react"
+import { Bell, Plus, Upload, Search, UserPlus, Settings, Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -15,7 +15,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
+import { useState, useEffect } from "react" // 1. Ye do cheezein import karo
 
 function useRole() {
   const pathname = usePathname()
@@ -26,7 +26,15 @@ function useRole() {
 
 export function Navbar() {
   const role = useRole()
-  const {theme,setTheme} = useTheme()
+  const { theme, setTheme } = useTheme()
+  
+  // 2. Mounted state banao
+  const [mounted, setMounted] = useState(false)
+
+  // 3. useEffect se mounted ko true karo jab component load ho jaye
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
@@ -45,7 +53,21 @@ export function Navbar() {
       {/* Right — Role Based Buttons + Profile */}
       <div className="flex items-center gap-3">
 
-        {/* HR Buttons */}
+        {/* Theme Toggle — Condition lagao */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {/* 4. Sirf tab icon dikhao jab 'mounted' true ho */}
+          {mounted ? (
+            theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />
+          ) : (
+            <div className="w-5 h-5" /> // Khali space jab tak load ho raha ho
+          )}
+        </Button>
+
+        {/* ... baaki sara code wahi purana ... */}
         {role === "hr" && (
           <>
             <Button variant="outline" size="sm" className="gap-2">
@@ -58,50 +80,15 @@ export function Navbar() {
             </Button>
           </>
         )}
-
-        {/* Candidate Buttons */}
-        {role === "candidate" && (
-          <Button size="sm" className="gap-2">
-            <Search className="w-4 h-4" />
-            Browse Jobs
-          </Button>
-        )}
-
-        {/* Admin Buttons */}
-        {role === "admin" && (
-          <>
-            <Button variant="outline" size="sm" className="gap-2">
-              <UserPlus className="w-4 h-4" />
-              Add User
-            </Button>
-            <Button size="sm" className="gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </Button>
-          </>
-        )}
-
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
-        </Button>
-
-        {/* Notifications */}
+        
+        {/* ... baki purana code ... */}
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
         </Button>
 
-        {/* User Profile */}
         <DropdownMenu>
+          {/* Profile wala part ... */}
           <DropdownMenuTrigger asChild>
             <div className="flex items-center gap-2 cursor-pointer">
               <Avatar className="w-8 h-8">
@@ -110,24 +97,15 @@ export function Navbar() {
                   {role === "hr" ? "HR" : role === "admin" ? "AD" : "CA"}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden md:block">
+              <div className="hidden md:block text-left">
                 <p className="text-sm font-medium">
-                  {role === "hr"
-                    ? "HR Manager"
-                    : role === "admin"
-                    ? "Admin"
-                    : "Candidate"}
+                   {role === "hr" ? "HR Manager" : role === "admin" ? "Admin" : "Candidate"}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {role === "hr"
-                    ? "hr@gmail.com"
-                    : role === "admin"
-                    ? "admin@gmail.com"
-                    : "candidate@gmail.com"}
-                </p>
+                <p className="text-xs text-muted-foreground uppercase">{role}</p>
               </div>
             </div>
           </DropdownMenuTrigger>
+          {/* Dropdown content ... */}
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -139,7 +117,6 @@ export function Navbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
     </header>
   )
