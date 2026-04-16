@@ -57,7 +57,7 @@ export const createJobSchema = z.object({
   skills: z
     .array(z.string())
     .min(1, "At least one skill is required!"),
-    status: z.enum(["active", "closed", "draft"]).optional(),
+  status: z.enum(["active", "closed", "draft"]).optional(),
   jobType: z.enum([
     "full-time",
     "part-time", 
@@ -80,6 +80,24 @@ export const applicationSchema = z.object({
     .optional(),
 })
 
+// Interview Validations
+
+export const interviewSchema = z.object({
+  jobId: z.string().min(1, "Job ID is required!"),
+  candidateId: z.string().min(1, "Candidate ID is required!"),
+  interviewDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format! Use YYYY-MM-DD",
+  }),
+  startTime: z.string().min(1, "Start time is required!"), // e.g. "09:00"
+  endTime: z.string().min(1, "End time is required!"),   // e.g. "09:30"
+  type: z.enum(["onsite", "remote"]).default("onsite"), 
+  location: z.string().min(1, "Location (Address or Link) is required!"),
+  notes: z.string().max(500, "Notes cannot exceed 500 characters!").optional(),
+})
+
+
+
+
 // ==================
 // TYPE EXPORTS
 // ==================
@@ -89,3 +107,4 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type CreateJobInput = z.infer<typeof createJobSchema>
 export type UpdateJobInput = z.infer<typeof updateJobSchema>
 export type ApplicationInput = z.infer<typeof applicationSchema>
+export type InterviewInput = z.infer<typeof interviewSchema>
