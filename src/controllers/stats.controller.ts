@@ -40,3 +40,49 @@ export const getDashboardStats = asyncHandler(async (req: NextRequest) => {
 
   return NextResponse.json(new ApiResponse(200, stats, "HR Stats fetched!"))
 })
+
+// 🛠️ Yahan hum MongoDB Aggregation use kar rahe hain (Advanced Data Mining)
+export const getChartStats = asyncHandler(async (req: NextRequest) => {
+  await connectDB()
+  const user = await verifyJWT(req)
+
+  // Security: Sirf HR aur Admin stats dekh saken
+  if (user.role !== "hr" && user.role !== "admin") {
+    throw new ApiError(403, "Not authorized!")
+  }
+
+  // 1. Pehle HR ki saari Jobs ki IDs nikaalo (Scaling logic)
+  const myJobs = await Job.find({ postedBy: user._id }).select("_id")
+  const jobIds = myJobs.map(job => job._id)
+
+  // 2. Aggregation Pipeline (Asli Magic ✨)
+  const chartData = await Application.aggregate([
+    {
+      // Stage 1: Sirf woh applications lo jo is HR ki jobs par hain
+      $match: { job: { $in: jobIds } }
+    },
+    {
+      // Stage 2: Har application ki 'createdAt' date se Mahina (Month) nikalo
+      $group: {
+        _id: { $month: "$createdAt" }, // 1 for Jan, 2 for Feb etc.
+        count: { $sum: 1 }             // Har record par +1 karo
+      }
+    },
+    {
+      // Stage 3: Results ko Month ke hisaab se seedha (Sort) karo
+      $sort: { "_id": 1 }
+    }
+  ])
+
+  // Month numbers (1, 2) ko Names (Jan, Feb) mein badalne ke liye:
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  
+  const formattedData = chartData.map(item => ({
+    month: monthNames[item._id - 1],
+    applicants: item.count
+  }))
+
+  return NextResponse.json(
+    new ApiResponse(200, formattedData, "Chart data fetched successfully!")
+  )
+})
