@@ -34,7 +34,7 @@ import {
 // HR Menu
 const hrMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/hr/dashboard" },
-  { title: "Open Hiring", icon: Briefcase, url: "/hr/jobs" },
+  { title: "Jobs", icon: Briefcase, url: "/hr/jobs" },
   { title: "Candidates", icon: Users, url: "/hr/candidates" },
   { title: "Schedule", icon: Calendar, url: "/hr/schedule" },
   { title: "Integrations", icon: Plug, url: "/hr/integrations" },
