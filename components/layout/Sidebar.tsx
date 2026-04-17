@@ -20,7 +20,6 @@ import {
   Calendar,
   ClipboardList,
   Search,
-  Shield,
   BarChart,
   FileEdit,
   Mail,
@@ -28,7 +27,7 @@ import {
   FileText
 } from "lucide-react"
 
-// HR Menu
+// Menu Configs
 const hrMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/hr/dashboard" },
   { title: "Jobs", icon: Briefcase, url: "/hr/jobs" },
@@ -44,7 +43,6 @@ const hrJobManager = [
   { title: "Email Templates", icon: Mail, url: "/hr/email-templates" },
 ]
 
-// Candidate Menu
 const candidateMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/candidate/dashboard" },
   { title: "Browse Jobs", icon: Search, url: "/candidate/jobs" },
@@ -53,7 +51,6 @@ const candidateMainMenu = [
   { title: "Documents", icon: FileText, url: "/candidate/documents" },
 ]
 
-// Admin Menu
 const adminMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/admin/dashboard" },
   { title: "Users", icon: Users, url: "/admin/users" },
@@ -63,20 +60,13 @@ const adminMainMenu = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const [role, setRole] = useState<string>("hr")
-
-  useEffect(() => {
-    if (pathname.startsWith("/admin")) {
-      setRole("admin"); localStorage.setItem("userRole", "admin")
-    } else if (pathname.startsWith("/candidate")) {
-      setRole("candidate"); localStorage.setItem("userRole", "candidate")
-    } else if (pathname.startsWith("/hr")) {
-      setRole("hr"); localStorage.setItem("userRole", "hr")
-    } else {
-      const savedRole = localStorage.getItem("userRole")
-      if (savedRole) setRole(savedRole)
-    }
-  }, [pathname])
+  
+  // Asli Role Detection Logic
+  const role = pathname.startsWith("/admin") 
+  ? "admin" 
+  : pathname.startsWith("/candidate") 
+  ? "candidate" 
+  : "hr"
 
   const mainMenu = role === "candidate" ? candidateMainMenu : role === "admin" ? adminMainMenu : hrMainMenu
   const showJobManager = role === "hr"
@@ -96,7 +86,6 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Main Menu Group */}
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-[10px] font-bold uppercase text-muted-foreground/70 tracking-widest">Main Menu</SidebarGroupLabel>
           <SidebarMenu className="px-2">
@@ -113,7 +102,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Job Manager Tools (Sirf HR ke liye) */}
         {showJobManager && (
           <SidebarGroup>
             <SidebarGroupLabel className="px-4 text-[10px] font-bold uppercase text-muted-foreground/70 tracking-widest">Job Manager</SidebarGroupLabel>

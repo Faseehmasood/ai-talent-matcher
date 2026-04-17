@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Plus, Upload, Search, UserPlus, Settings, Sun, Moon } from "lucide-react"
+import { Bell, Plus, Upload, Search, UserPlus, Settings, Sun, Moon, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,102 +22,102 @@ import Link from "next/link"
 export function Navbar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const [role, setRole] = useState<string>("hr")
   const [mounted, setMounted] = useState(false)
 
-  // 🛠️ Hydration fix and Role Persistence
-  useEffect(() => {
-    setMounted(true)
-    if (pathname.startsWith("/admin")) {
-      setRole("admin")
-      localStorage.setItem("userRole", "admin")
-    } else if (pathname.startsWith("/candidate")) {
-      setRole("candidate")
-      localStorage.setItem("userRole", "candidate")
-    } else if (pathname.startsWith("/hr")) {
-      setRole("hr")
-      localStorage.setItem("userRole", "hr")
-    } else {
-      const savedRole = localStorage.getItem("userRole")
-      if (savedRole) setRole(savedRole)
-    }
-  }, [pathname])
+
+  // 🛠️ FIX: Stricter Role Detection
+const role = pathname.startsWith("/admin") 
+  ? "admin" 
+  : pathname.startsWith("/candidate") 
+  ? "candidate" 
+  : "hr"
+
+  useEffect(() => setMounted(true), [])
 
   return (
     <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
         <div className="relative w-72">
-          <Input placeholder="Search..." className="pl-4 rounded-full bg-muted border-0" />
+          <Input placeholder="Search..." className="pl-4 rounded-full bg-muted border-0 h-10 shadow-inner" />
         </div>
       </div>
 
       <div className="flex items-center gap-3">
         {/* Theme Toggle */}
-        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full">
           {mounted ? (theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />) : <div className="w-5 h-5" />}
         </Button>
 
-        {/* Role Based Actions */}
+        {/* Dynamic Action Buttons */}
         {role === "hr" && (
-          <>
-            <Button variant="outline" size="sm" className="gap-2 rounded-xl hidden md:flex">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" className="gap-2 rounded-xl hidden md:flex border-border shadow-sm">
               <Upload className="w-4 h-4" /> Import
             </Button>
             <CreateJobModal />
-          </>
+          </div>
         )}
 
         {role === "admin" && (
-          <Button variant="outline" size="sm" className="gap-2 rounded-xl">
+          <Button variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
             <UserPlus className="w-4 h-4" /> Add User
           </Button>
         )}
 
         {role === "candidate" && (
-          <Button variant="outline" size="sm" className="gap-2 rounded-xl">
+          <Button variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
             <Search className="w-4 h-4" /> Browse Jobs
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative rounded-full">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
         </Button>
 
+        {/* Dynamic User Dropdown Link Logic */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 cursor-pointer ml-2">
-              <Avatar className="w-9 h-9 border border-border">
+            <div className="flex items-center gap-2 cursor-pointer ml-2 hover:bg-muted/50 p-1 rounded-xl transition-colors">
+              <Avatar className="w-9 h-9 border border-border shadow-sm">
                 <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
                   {role === "hr" ? "HR" : role === "admin" ? "AD" : "CA"}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-bold leading-none">
+              <div className="hidden md:block text-left mr-1">
+                <p className="text-sm font-bold leading-none tracking-tight">
                   {role === "hr" ? "HR Manager" : role === "admin" ? "Admin" : "Candidate"}
                 </p>
-                <p className="text-[10px] text-muted-foreground uppercase mt-1">{role}</p>
+                <p className="text-[10px] text-muted-foreground uppercase mt-1 font-medium tracking-widest">{role}</p>
               </div>
             </div>
           </DropdownMenuTrigger>
           
-          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2">
+          <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-border/50">
             <DropdownMenuLabel className="font-normal p-2">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">My Account</p>
+                <p className="text-sm font-medium leading-none">Account Access</p>
                 <p className="text-xs text-muted-foreground">Manage profile settings</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-              <Link href="/profile">Profile</Link>
+            
+            {/* 🛠️ ROLE-SPECIFIC DYNAMIC LINKS ✅ */}
+            <DropdownMenuItem asChild className="rounded-xl cursor-pointer py-2">
+              <Link href={`/${role}/profile`} className="flex items-center gap-2">
+                 <User className="w-4 h-4" /> Profile
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-              <Link href="/settings">Settings</Link>
+            
+            <DropdownMenuItem asChild className="rounded-xl cursor-pointer py-2">
+              <Link href={`/${role}/settings`} className="flex items-center gap-2">
+                 <Settings className="w-4 h-4" /> Settings
+              </Link>
             </DropdownMenuItem>
+            
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 rounded-lg cursor-pointer font-medium">
+            <DropdownMenuItem className="text-red-500 rounded-xl cursor-pointer font-bold py-2 hover:bg-red-50 focus:bg-red-50 transition-colors">
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
