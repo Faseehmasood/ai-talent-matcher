@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// 1. Modal import kiya ✅
+import { ScheduleModal } from "@/components/dashboard/ScheduleModal"
 
 const applications = [
   {
@@ -162,6 +164,12 @@ export default function HRApplicationsPage() {
                         <Eye className="w-3 h-3" />
                         View
                       </Button>
+                      
+                      {/* 2. ScheduleModal yahan add kiya ✅ */}
+                      <ScheduleModal 
+                        candidateName={app.candidate} 
+                        jobTitle={app.job} 
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

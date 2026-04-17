@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Briefcase } from "lucide-react"
+import Link from "next/link"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -155,9 +156,9 @@ export default function LoginPage() {
           {/* Register Link */}
           <p className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <a href="/register" className="text-foreground font-medium hover:underline">
-              Contact Admin
-            </a>
+            <Link href="/register" className="text-foreground font-bold hover:underline">
+    Register here
+  </Link>
           </p>
 
         </div>
