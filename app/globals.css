@@ -127,3 +127,15 @@
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }
+
+
+
+
+/* globals.css ke bilkul end me ye paste karo */
+header, 
+.bg-background, 
+.border-border, 
+.bg-muted, 
+button {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}

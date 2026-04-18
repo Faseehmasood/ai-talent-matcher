@@ -63,6 +63,11 @@ const { email, password } = result.data
 
   // User dhundo
   const user = await User.findOne({ email })
+
+  if (user && user.isActive === false) {
+    throw new ApiError(403, "Your account has been suspended. Contact Admin.")
+  }
+
   if (!user) {
     throw new ApiError(404, "User not found!")
   }

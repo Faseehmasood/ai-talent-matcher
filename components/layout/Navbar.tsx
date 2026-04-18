@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { CreateJobModal } from "../dashboard/CreateJobModal"
 import Link from "next/link"
+import { AddUserModal } from "../dashboard/AddUserModal"
 
 export function Navbar() {
   const pathname = usePathname()
@@ -45,7 +46,7 @@ const role = pathname.startsWith("/admin")
 
       <div className="flex items-center gap-3">
         {/* Theme Toggle */}
-        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full">
+        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full transition-all duration-200">
           {mounted ? (theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />) : <div className="w-5 h-5" />}
         </Button>
 
@@ -60,10 +61,11 @@ const role = pathname.startsWith("/admin")
         )}
 
         {role === "admin" && (
-          <Button variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
-            <UserPlus className="w-4 h-4" /> Add User
-          </Button>
-        )}
+  <div className="flex items-center gap-3">
+    {/* PURANA BUTTON HATA KAR YEH DALO ✅ */}
+    <AddUserModal /> 
+  </div>
+)}
 
         {role === "candidate" && (
           <Button variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
