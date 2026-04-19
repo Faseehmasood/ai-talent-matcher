@@ -80,7 +80,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
 
               <div className="flex gap-3 pt-2">
                  <Button type="button" variant="outline" onClick={() => setStep("view")} className="flex-1 rounded-xl h-11">Back</Button>
-                 <Button type="submit" className="flex-[2] rounded-xl h-11 font-bold gap-2 shadow-lg shadow-primary/20">
+                 <Button type="submit" className="flex-2 rounded-xl h-11 font-bold gap-2 shadow-lg shadow-primary/20">
                    Submit Application <FileText className="w-4 h-4" />
                  </Button>
               </div>
