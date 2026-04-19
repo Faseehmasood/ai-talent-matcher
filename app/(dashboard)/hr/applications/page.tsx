@@ -2,6 +2,7 @@ import { Search, Filter, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ApplicationDetailModal } from "@/components/dashboard/ApplicationDetailModal"
 import {
   Table,
   TableBody,
@@ -159,19 +160,25 @@ export default function HRApplicationsPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                        <Eye className="w-3 h-3" />
-                        View
-                      </Button>
-                      
-                      {/* 2. ScheduleModal yahan add kiya ✅ */}
-                      <ScheduleModal 
-                        candidateName={app.candidate} 
-                        jobTitle={app.job} 
-                      />
-                    </div>
-                  </TableCell>
+  <div className="flex items-center gap-2">
+    <ApplicationDetailModal 
+      application={{
+        id: app.id,
+        name: app.candidate,
+        initials: app.initials,
+        role: app.job,
+        level: "Senior", 
+        date: app.appliedDate,
+        status: app.status
+      }} 
+    />
+    
+    <ScheduleModal 
+      candidateName={app.candidate} 
+      jobTitle={app.job} 
+    />
+  </div>
+</TableCell>
                 </TableRow>
               ))}
             </TableBody>

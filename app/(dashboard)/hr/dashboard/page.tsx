@@ -1,21 +1,22 @@
+"use client"
+
 import { StatsCard } from "@/components/dashboard/StatsCard"
 import { Chart } from "@/components/dashboard/Chart"
-import { Schedule } from "@/components/dashboard/Schedule"
 import { RecentApplications } from "@/components/dashboard/RecentApplications"
 import { Briefcase, Users, Eye } from "lucide-react"
 
 export default function HRDashboardPage() {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of notes regarding HR management
+      {/* 1. Simple & Bold Header */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">HR Overview</h1>
+        <p className="text-muted-foreground text-sm">
+          Everything you need to manage your recruitment pipeline.
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {/* 2. Key Metrics (Stats Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard
           title="Total opened jobs"
@@ -34,18 +35,15 @@ export default function HRDashboardPage() {
         />
       </div>
 
-      {/* Chart + Schedule */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <Chart />
-        </div>
-        <div className="lg:col-span-1">
-          <Schedule />
-        </div>
+      {/* 3. Analytics Section (Full Width Chart) ✅ */}
+      <div className="w-full">
+        <Chart />
       </div>
 
-      {/* Recent Applications */}
-      <RecentApplications />
+      {/* 4. Activity Section (Recent Applications) ✅ */}
+      <div className="pt-2">
+        <RecentApplications />
+      </div>
 
     </div>
   )

@@ -23,58 +23,65 @@ const data = [
 
 export function Chart() {
   return (
-    <Card className="rounded-2xl border border-border">
+    <Card className="rounded-3xl border-border shadow-sm bg-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg font-bold">Applicant Jobs</CardTitle>
+            <CardTitle className="text-lg font-bold tracking-tight">Applicant Jobs</CardTitle>
             <p className="text-sm text-muted-foreground">
               Total jobs applied by candidates in your company
             </p>
           </div>
-          {/* Weekly Toggle */}
-          <div className="flex items-center gap-1 bg-muted rounded-lg px-3 py-1">
-            <span className="text-sm font-medium">Weekly</span>
-            <span className="text-sm text-muted-foreground">▼</span>
+
+          {/* 🛠️ FIXED MONTHLY LABEL (DROPDOWN REMOVED) ✅ */}
+          <div className="px-3 py-1 bg-muted rounded-xl text-xs font-bold text-muted-foreground">
+            Monthly
           </div>
         </div>
 
-        {/* Growth */}
-        <div className="mt-2">
-          <span className="text-2xl font-bold">9.42%</span>
-          <p className="text-sm text-muted-foreground mt-1">
+        {/* Growth Statistics */}
+        <div className="mt-4">
+          <span className="text-3xl font-bold tracking-tighter">9.42%</span>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-xs">
             We&apos;re seeing a steady increase in candidate applications every week.
           </p>
         </div>
       </CardHeader>
 
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data} barSize={8} barGap={4}>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data} barSize={8} barGap={6}>
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fontWeight: 500 }}
+              dy={10}
             />
             <YAxis hide />
             <Tooltip
+              cursor={{ fill: 'transparent' }}
               contentStyle={{
-                borderRadius: "8px",
-                border: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                borderRadius: "12px",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                fontSize: "12px"
               }}
             />
             <Legend
+              verticalAlign="top"
+              align="right"
               iconType="circle"
-              iconSize={8}
+              iconSize={6}
+              wrapperStyle={{ paddingBottom: "20px", fontSize: "11px", fontWeight: "600" }}
               formatter={(value) => (
-                <span className="text-xs capitalize">{value}</span>
+                <span className="text-muted-foreground uppercase tracking-widest ml-1">{value}</span>
               )}
             />
-            <Bar dataKey="onSite" name="On-Site" fill="#94a3b8" radius={4} />
-            <Bar dataKey="hybrid" name="Hybrid" fill="#fbbf24" radius={4} />
-            <Bar dataKey="remote" name="Remote" fill="#1e293b" radius={4} />
+            {/* Bars with Original Colors */}
+            <Bar dataKey="onSite" name="On-Site" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="hybrid" name="Hybrid" fill="#fbbf24" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="remote" name="Remote" fill="#1e293b" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

@@ -53,7 +53,7 @@ export function CandidateRecentApps() {
               <TableHead>Company</TableHead>
               <TableHead>Date Applied</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,11 +72,7 @@ export function CandidateRecentApps() {
                     {app.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" className="gap-2 rounded-xl">
-                    View Details <ArrowRight className="w-3 h-3" />
-                  </Button>
-                </TableCell>
+               
               </TableRow>
             ))}
           </TableBody>

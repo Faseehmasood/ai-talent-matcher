@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
+// 1. Asli Modal Import kiya ✅
+import { JobDetailModal } from "@/components/dashboard/JobDetailModal"
+
 const myApplications = [
   {
     id: "APP-001",
@@ -45,7 +48,6 @@ const myApplications = [
   }
 ]
 
-// Status styling logic
 const statusConfig = {
   hired: { color: "bg-green-100 text-green-700", icon: CheckCircle2 },
   shortlisted: { color: "bg-blue-100 text-blue-700", icon: CheckCircle2 },
@@ -59,13 +61,13 @@ export default function CandidateApplicationsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Applications</h1>
-        <p className="text-muted-foreground">
-          Track the status of all your job applications in one place.
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">My Applications</h1>
+        <p className="text-muted-foreground text-sm">
+          Track the status and details of all your submitted job applications.
         </p>
       </div>
 
-      {/* Stats Cards Overview */}
+      {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total", value: 4, icon: Building2, color: "text-primary" },
@@ -73,13 +75,13 @@ export default function CandidateApplicationsPage() {
           { label: "Shortlisted", value: 1, icon: CheckCircle2, color: "text-blue-500" },
           { label: "Rejected", value: 1, icon: XCircle, color: "text-red-500" },
         ].map((stat) => (
-          <Card key={stat.label} className="rounded-2xl border-border bg-card/50">
+          <Card key={stat.label} className="rounded-2xl border-border bg-card/50 shadow-sm">
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase">{stat.label}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{stat.label}</p>
                 <p className="text-2xl font-bold">{stat.value}</p>
               </div>
-              <stat.icon className={`w-5 h-5 ${stat.color} opacity-70`} />
+              <stat.icon className={`w-5 h-5 ${stat.color} opacity-50`} />
             </CardContent>
           </Card>
         ))}
@@ -90,63 +92,70 @@ export default function CandidateApplicationsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search applications by job or company..."
-            className="pl-9 h-11 rounded-xl bg-background border-border"
+            placeholder="Search by job or company..."
+            className="pl-9 h-11 rounded-xl bg-background border-border shadow-sm"
           />
         </div>
-        <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-border">
+        <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-border shadow-sm hover:bg-muted">
           <Filter className="w-4 h-4" />
         </Button>
       </div>
 
       {/* Applications Table */}
-      <Card className="rounded-2xl border-border overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border">
-          <CardTitle className="text-sm font-semibold">Application History</CardTitle>
+      <Card className="rounded-3xl border-border overflow-hidden shadow-sm bg-card">
+        <CardHeader className="bg-muted/30 border-b border-border py-4">
+          <CardTitle className="text-sm font-bold uppercase text-muted-foreground/70 tracking-widest">History</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-muted/20">
+              <TableHeader className="bg-muted/10">
                 <TableRow className="hover:bg-transparent border-border">
-                  <TableHead className="w-[100px]">App ID</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Applied Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead className="w-[120px] font-bold">App ID</TableHead>
+                  <TableHead className="font-bold">Job Title</TableHead>
+                  <TableHead className="font-bold">Company</TableHead>
+                  <TableHead className="font-bold">Applied Date</TableHead>
+                  <TableHead className="font-bold">Status</TableHead>
+                  <TableHead className="text-right px-8 font-bold">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {myApplications.map((app) => {
                   const config = statusConfig[app.status as keyof typeof statusConfig]
-                  const Icon = config.icon
+                  const StatusIcon = config.icon
 
                   return (
-                    <TableRow key={app.id} className="border-border hover:bg-muted/10 transition-colors">
-                      <TableCell className="font-medium text-xs text-muted-foreground">
+                    <TableRow key={app.id} className="border-border hover:bg-muted/5 transition-colors">
+                      <TableCell className="font-mono text-[10px] text-muted-foreground">
                         {app.id}
                       </TableCell>
-                      <TableCell className="font-semibold text-sm">
+                      <TableCell className="font-bold text-sm">
                         {app.jobTitle}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm font-medium">
                         {app.company}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {app.appliedDate}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`rounded-lg px-2 py-1 border-0 flex items-center gap-1.5 w-fit font-medium capitalize ${config.color}`}>
-                          <Icon className="w-3.5 h-3.5" />
+                        <Badge className={`rounded-lg px-2 py-0.5 border-0 flex items-center gap-1.5 w-fit font-bold text-[9px] uppercase tracking-tighter ${config.color}`}>
+                          <StatusIcon className="w-3 h-3" />
                           {app.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-primary/5 hover:text-primary">
-                          <Eye className="w-4 h-4" />
-                          <span className="hidden sm:inline">Details</span>
-                        </Button>
+                      <TableCell className="text-right px-6">
+                        
+                        {/* 🛠️ ASLI ACTION MODAL CONNECTED ✅ */}
+                        <JobDetailModal job={{
+                           title: app.jobTitle,
+                           company: app.company,
+                           location: "Online / Verified",
+                           jobType: "Full-time",
+                           createdAt: app.appliedDate,
+                           status: app.status
+                        }} />
+
                       </TableCell>
                     </TableRow>
                   )

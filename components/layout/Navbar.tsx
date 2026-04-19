@@ -67,12 +67,6 @@ const role = pathname.startsWith("/admin")
   </div>
 )}
 
-        {role === "candidate" && (
-          <Button variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
-            <Search className="w-4 h-4" /> Browse Jobs
-          </Button>
-        )}
-
         <Button variant="ghost" size="icon" className="relative rounded-full">
           <Bell className="w-5 h-5" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />

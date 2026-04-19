@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 // import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { JobViewAndApplyModal } from "@/components/dashboard/JobViewAndApplyModal"
 
 const activeJobs = [
   {
@@ -126,10 +127,7 @@ export default function CandidateJobsPage() {
             </CardContent>
 
             <CardFooter className="bg-muted/30 border-t border-border p-4">
-              <Button className="w-full rounded-2xl h-11 group/btn gap-2">
-                View Details
-                <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-              </Button>
+              <JobViewAndApplyModal job={job} />
             </CardFooter>
           </Card>
         ))}

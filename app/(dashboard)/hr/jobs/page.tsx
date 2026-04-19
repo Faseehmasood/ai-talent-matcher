@@ -86,8 +86,6 @@ export default function HRJobsPage() {
           </p>
         </div>
         
-        {/* Create Job Action ✅ */}
-        <CreateJobModal /> 
       </div>
 
       {/* Quick Stats Summary */}
