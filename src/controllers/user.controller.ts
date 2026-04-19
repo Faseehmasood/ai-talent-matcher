@@ -5,6 +5,8 @@ import { ApiError } from "../utils/ApiError"
 import { ApiResponse } from "../utils/ApiResponse"
 import { User } from "../models/users.model" // 💡 Make sure name is 'user.model'
 import connectDB from "@/src/lib/db"
+import { uploadOnCloudinary } from "../utils/cloudinary"
+import { updateProfileSchema, changePasswordSchema } from "../lib/validations"
 
 // ==========================================
 // 1. ADMIN CREATE USER (Staff/Partner)
@@ -73,4 +75,66 @@ export const toggleUserStatus = asyncHandler(async (req: NextRequest, context?: 
     name: user.name,
     isActive: user.isActive
   }, message))
+})
+
+
+
+export const updateAccountDetails = asyncHandler(async (req: NextRequest) => {
+  await connectDB()
+  const user = await verifyJWT(req)
+  const body = await req.json()
+
+  // Validate only text fields
+  const result = updateProfileSchema.safeParse(body)
+  if (!result.success) throw new ApiError(400, result.error.issues[0].message)
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    { $set: result.data },
+    { new: true }
+  ).select("-password")
+
+  return NextResponse.json(new ApiResponse(200, updatedUser, "Account details updated!"))
+})
+
+
+
+export const updateUserAvatar = asyncHandler(async (req: NextRequest) => {
+  await connectDB()
+  const user = await verifyJWT(req)
+  const formData = await req.formData()
+  const avatarFile = formData.get("avatar") as File
+
+  if (!avatarFile) throw new ApiError(400, "Please upload an image")
+
+  // Cloudinary Buffer logic (Fast & Secure)
+  const bytes = await avatarFile.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+  const avatarUrl = await uploadOnCloudinary(buffer, avatarFile.name)
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    { $set: { avatar: avatarUrl } },
+    { new: true }
+  ).select("-password")
+
+  return NextResponse.json(new ApiResponse(200, updatedUser, "Avatar updated successfully!"))
+})
+
+
+
+export const changeCurrentPassword = asyncHandler(async (req: NextRequest) => {
+  await connectDB()
+  const user = await verifyJWT(req)
+  const { oldPassword, newPassword } = await req.json()
+
+  const dbUser = await User.findById(user._id)
+  if (!(await dbUser.comparePassword(oldPassword))) {
+    throw new ApiError(400, "Old password does not match")
+  }
+
+  dbUser.password = newPassword
+  await dbUser.save({ validateBeforeSave: false }) // Auto-hashes via Mongoose pre-save hook ✅
+
+  return NextResponse.json(new ApiResponse(200, {}, "Password changed successfully!"))
 })

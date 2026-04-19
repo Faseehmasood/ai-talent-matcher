@@ -108,3 +108,18 @@ export type CreateJobInput = z.infer<typeof createJobSchema>
 export type UpdateJobInput = z.infer<typeof updateJobSchema>
 export type ApplicationInput = z.infer<typeof applicationSchema>
 export type InterviewInput = z.infer<typeof interviewSchema>
+
+
+
+// 1. Profile Update (Text only)
+export const updateProfileSchema = z.object({
+  name: z.string().min(2).optional(),
+  bio: z.string().max(150).optional(),
+  phoneNumber: z.string().optional(),
+})
+
+// 2. Password Change
+export const changePasswordSchema = z.object({
+  oldPassword: z.string().min(1, "Old password is required"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+})

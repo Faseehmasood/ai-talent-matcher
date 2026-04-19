@@ -10,6 +10,8 @@ export interface IUser extends Document {
   avatar?: string
   refreshToken?: string // ← Naya add kiya
   isActive: boolean
+  bio?: string
+  phoneNumber?: string
   createdAt: Date
   updatedAt: Date
   comparePassword(password: string): Promise<boolean>
@@ -52,6 +54,15 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    bio: {
+  type: String,
+  maxlength: [150, "Bio cannot exceed 150 characters"],
+  default: "Recruitment professional at TalentaSync"
+},
+phoneNumber: {
+  type: String,
+  default: ""
+},
   },
   {
     timestamps: true,
