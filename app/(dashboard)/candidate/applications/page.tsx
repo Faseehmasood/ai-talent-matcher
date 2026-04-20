@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-// 1. Asli Modal Import kiya ✅
+// 1. Asli Modal Import kiya 
 import { JobDetailModal } from "@/components/dashboard/JobDetailModal"
 
 const myApplications = [

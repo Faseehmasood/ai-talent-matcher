@@ -26,7 +26,7 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false)
 
 
-  // 🛠️ FIX: Stricter Role Detection
+  //  FIX: Stricter Role Detection
 const role = pathname.startsWith("/admin") 
   ? "admin" 
   : pathname.startsWith("/candidate") 
@@ -62,7 +62,7 @@ const role = pathname.startsWith("/admin")
 
         {role === "admin" && (
   <div className="flex items-center gap-3">
-    {/* PURANA BUTTON HATA KAR YEH DALO ✅ */}
+    {/* PURANA BUTTON HATA KAR YEH DALO  */}
     <AddUserModal /> 
   </div>
 )}

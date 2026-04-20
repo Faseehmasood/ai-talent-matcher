@@ -7,9 +7,9 @@ import { verifyJWT } from "../middleware/auth"
 import connectDB from "../lib/db"
 import { createJobSchema, updateJobSchema } from "../lib/validations"
 
-// ==================
+
 // CREATE JOB — Sirf HR
-// ==================
+
 export const createJob = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
@@ -38,9 +38,9 @@ const job = await Job.create({
   )
 })
 
-// ==================
+
 // GET ALL JOBS — Public
-// ==================
+
 export const getAllJobs = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
@@ -106,9 +106,9 @@ export const getAllJobs = asyncHandler(async (req: NextRequest) => {
   )
 })
 
-// ==================
+
 // GET SINGLE JOB — Public
-// ==================
+
 export const getJobById = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
 
@@ -130,9 +130,9 @@ export const getJobById = asyncHandler(async (req: NextRequest, context?: { para
   )
 })
 
-// ==================
+
 // UPDATE JOB — Sirf HR
-// ==================
+
 export const updateJob = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
 
@@ -217,9 +217,9 @@ export const deleteJob = asyncHandler(async (req: NextRequest, context?: { param
   )
 })
 
-// ==================
+
 // GET HR JOBS — Sirf HR apni jobs dekhe
-// ==================
+
 export const getMyJobs = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 

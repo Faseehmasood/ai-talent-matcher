@@ -41,7 +41,7 @@ export const getDashboardStats = asyncHandler(async (req: NextRequest) => {
   return NextResponse.json(new ApiResponse(200, stats, "HR Stats fetched!"))
 })
 
-// 🛠️ Yahan hum MongoDB Aggregation use kar rahe hain (Advanced Data Mining)
+// Yahan hum MongoDB Aggregation use kar rahe hain (Advanced Data Mining)
 export const getChartStats = asyncHandler(async (req: NextRequest) => {
   await connectDB()
   const user = await verifyJWT(req)

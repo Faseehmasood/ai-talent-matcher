@@ -8,9 +8,8 @@ import connectDB from "@/src/lib/db"
 import { uploadOnCloudinary } from "../utils/cloudinary"
 import { updateProfileSchema, changePasswordSchema } from "../lib/validations"
 
-// ==========================================
 // 1. ADMIN CREATE USER (Staff/Partner)
-// ==========================================
+
 export const adminCreateUser = asyncHandler(async (req: NextRequest) => {
   await connectDB()
   
@@ -37,9 +36,9 @@ export const adminCreateUser = asyncHandler(async (req: NextRequest) => {
   return NextResponse.json(new ApiResponse(201, createdUser, "Internal Account Created!"))
 })
 
-// ==========================================
-// 2. TOGGLE USER STATUS (Suspend/Activate) ✅
-// ==========================================
+
+// 2. TOGGLE USER STATUS (Suspend/Activate)
+
 export const toggleUserStatus = asyncHandler(async (req: NextRequest, context?: { params: Promise<any> | any }) => {
   await connectDB()
   
@@ -134,7 +133,7 @@ export const changeCurrentPassword = asyncHandler(async (req: NextRequest) => {
   }
 
   dbUser.password = newPassword
-  await dbUser.save({ validateBeforeSave: false }) // Auto-hashes via Mongoose pre-save hook ✅
+  await dbUser.save({ validateBeforeSave: false }) // Auto-hashes via Mongoose pre-save hook 
 
   return NextResponse.json(new ApiResponse(200, {}, "Password changed successfully!"))
 })

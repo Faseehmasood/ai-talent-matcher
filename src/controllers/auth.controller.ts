@@ -121,9 +121,9 @@ const { email, password } = result.data
   return response
 })
 
-// ==================
+
 // REFRESH TOKEN
-// ==================
+
 export const refreshAccessToken = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
@@ -185,9 +185,9 @@ export const refreshAccessToken = asyncHandler(async (req: NextRequest) => {
   return response
 })
 
-// ==================
+
 // LOGOUT
-// ==================
+
 export const logout = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 

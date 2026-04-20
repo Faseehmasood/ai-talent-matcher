@@ -9,9 +9,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary"
 import { applicationSchema } from "../lib/validations"
 import connectDB from "../lib/db"
 
-// ==================
+
 // APPLY FOR JOB — Sirf Candidate
-// ==================
+
 export const applyForJob = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
@@ -93,9 +93,9 @@ export const applyForJob = asyncHandler(async (req: NextRequest) => {
   )
 })
 
-// ==================
+
 // GET MY APPLICATIONS — Candidate apni applications dekhe
-// ==================
+
 export const getMyApplications = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
@@ -114,9 +114,9 @@ export const getMyApplications = asyncHandler(async (req: NextRequest) => {
   )
 })
 
-// ==================
+
 // GET JOB APPLICATIONS — HR dekhe
-// ==================
+
 export const getJobApplications = asyncHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     await connectDB()
@@ -162,9 +162,9 @@ export const getJobApplications = asyncHandler(
   }
 )
 
-// ==================
+
 // UPDATE APPLICATION STATUS — Sirf HR
-// ==================
+
 export const updateApplicationStatus = asyncHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     await connectDB()
