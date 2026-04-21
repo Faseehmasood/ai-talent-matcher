@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       
-      {/* 1. CLASSIC PUBLIC NAVBAR ✅ */}
+      {/* 1. CLASSIC PUBLIC NAVBAR  */}
       <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export default function Home() {
             AI-Driven Recruitment Platform
           </Badge>
           
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[1] text-foreground">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-foreground">
             The smartest way to <br />
             <span className="text-primary">hire and get hired.</span>
           </h1>
@@ -104,7 +104,7 @@ export default function Home() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{job.type}</p>
                  </div>
                  
-                 {/* 🛠️ REDIRECTS TO LOGIN (GUEST PROTECTION) ✅ */}
+                 {/* 🛠️ REDIRECTS TO LOGIN (GUEST PROTECTION)  */}
                  <Button asChild className="rounded-2xl h-12 px-8 font-black shadow-lg shadow-primary/20">
                     <Link href="/login">Apply Now</Link>
                  </Button>
@@ -114,7 +114,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. FOOTER ✅ */}
+      {/* 4. FOOTER  */}
       <footer className="py-16 border-t border-border bg-muted/20 text-center">
          <div className="flex items-center justify-center gap-2 mb-4 opacity-50">
             <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center text-white font-bold text-[10px]">T</div>
