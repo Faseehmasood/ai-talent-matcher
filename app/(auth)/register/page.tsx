@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Briefcase, UserCircle, UserPlus } from "lucide-react"
+import { registerUserAction } from "@/src/actions/auth.actions"
+import { useRouter } from "next/navigation"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,9 +22,21 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // Integration baad mein karenge, abhi sirf console log
-    console.log("Register Data:", formData)
-    setTimeout(() => setLoading(false), 1500)
+    try {
+      const res = await registerUserAction(formData);
+
+      if (res.success) {
+        alert("Account created successfully! Please sign in.")
+        router.push("/login");
+      } else {
+        alert(res.message)
+      }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+    
   }
 
   return (

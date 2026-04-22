@@ -5,20 +5,37 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Briefcase } from "lucide-react"
 import Link from "next/link"
+import { loginUserAction } from "@/src/actions/auth.actions"
+import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/src/store/useAuthStore"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const setAuth = useAuthStore((state) => state.setAuth)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    // API call baad mein karenge
-    console.log("Login:", email, password)
+    const response = await loginUserAction({ email, password })
 
+    if (response.success && response.user) {
+      // 1. Zustand Store mein User data dalo 
+      setAuth(response.user as any)
+
+      // 2. Role ke hisaab se Redirect karo 
+      const role = response.user.role
+      if (role === "admin") router.push("/admin/dashboard")
+      else if (role === "hr") router.push("/hr/dashboard")
+      else router.push("/candidate/dashboard")
+
+    } else {
+      alert(response.message)
+    }
     setLoading(false)
   }
 
