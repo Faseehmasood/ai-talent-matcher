@@ -61,14 +61,14 @@ export default function HRCandidatesPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 rounded-2xl p-1.5 shadow-xl border-border/50">
                     
-                    {/* ✅ RAKHO: Backend resume URL support karta hai */}
+                    {/*  RAKHO: Backend resume URL support karta hai */}
                     <DropdownMenuItem className="rounded-xl cursor-pointer gap-2 font-medium">
                       <Download className="w-4 h-4 text-primary" /> Download CV
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator className="opacity-50" />
                     
-                    {/* ✅ RAKHO: Backend isActive toggle support karta hai */}
+                    {/* RAKHO: Backend isActive toggle support karta hai */}
                     <DropdownMenuItem className="text-red-500 rounded-xl cursor-pointer font-bold gap-2 focus:bg-red-50 focus:text-red-600">
                       <UserX className="w-4 h-4" /> Archive Candidate
                     </DropdownMenuItem>
