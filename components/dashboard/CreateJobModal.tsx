@@ -1,98 +1,138 @@
 "use client"
 
 import { useState } from "react"
+import { createJobAction } from "@/src/actions/job.actions" //  Action import kiya
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Loader2 } from "lucide-react"
 
 export function CreateJobModal() {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  
+  // 1. Form State Define karo 
+  const [formData, setFormData] = useState({
+    title: "",
+    company: "",
+    location: "",
+    jobType: "full-time",
+    minSalary: "",
+    maxSalary: "",
+    description: "",
+    skills: "" // Hum isay comma-separated string lenge phir array banayenge
+  })
+
+  // 2. Submit Logic 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    //  DATA FORMATTING: Backend ke mutabiq dhalo 
+    const finalData = {
+      title: formData.title,
+      company: formData.company,
+      location: formData.location,
+      jobType: formData.jobType,
+      description: formData.description,
+      salary: {
+        min: Number(formData.minSalary),
+        max: Number(formData.maxSalary),
+        currency: "PKR"
+      },
+      skills: formData.skills.split(",").map(s => s.trim()) // String to Array
+    }
+
+    const response = await createJobAction(finalData)
+
+    if (response.success) {
+      alert("Job Posted Successfully!")
+      setOpen(false) // Modal band kar do
+      setFormData({ title: "", company: "", location: "", jobType: "full-time", minSalary: "", maxSalary: "", description: "", skills: "" }) // Reset form
+    } else {
+      alert(response.message || "Failed to post job. Check all fields.")
+    }
+    setLoading(false)
+  }
+
   return (
-    <Dialog>
-      {/* 1. Button jo Modal ko khole ga */}
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2 rounded-xl">
-          <PlusCircle className="w-4 h-4" />
-          Create Job
+          <PlusCircle className="w-4 h-4" /> Create Job
         </Button>
       </DialogTrigger>
 
-      {/* 2. Modal ka Content */}
       <DialogContent className="sm:max-w-[600px] rounded-3xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Post a New Job</DialogTitle>
-          <DialogDescription>
-            Fill in the details below to attract the best candidates.
-          </DialogDescription>
-        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Post a New Job</DialogTitle>
+            <DialogDescription>Fill in the details to publish your job listing.</DialogDescription>
+          </DialogHeader>
 
-        <div className="grid gap-6 py-4">
-          {/* Job Title & Company */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Job Title</Label>
-              <Input id="title" placeholder="e.g. Senior React Developer" className="rounded-xl" />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label>Job Title</Label>
+                <Input required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <Label>Company</Label>
+                <Input required value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="rounded-xl" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company Name</Label>
-              <Input id="company" placeholder="e.g. Tech Solutions" className="rounded-xl" />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label>Location</Label>
+                <Input required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <Label>Job Type</Label>
+                <select 
+                  value={formData.jobType} 
+                  onChange={(e) => setFormData({...formData, jobType: e.target.value})}
+                  className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                >
+                  <option value="full-time">Full-time</option>
+                  <option value="part-time">Part-time</option>
+                  <option value="remote">Remote</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label>Min Salary</Label>
+                <Input required type="number" value={formData.minSalary} onChange={(e) => setFormData({...formData, minSalary: e.target.value})} className="rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <Label>Max Salary</Label>
+                <Input required type="number" value={formData.maxSalary} onChange={(e) => setFormData({...formData, maxSalary: e.target.value})} className="rounded-xl" />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Skills (Comma separated)</Label>
+              <Input required placeholder="React, Node, MongoDB" value={formData.skills} onChange={(e) => setFormData({...formData, skills: e.target.value})} className="rounded-xl" />
+            </div>
+
+            <div className="space-y-1">
+              <Label>Description</Label>
+              <Textarea required value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[80px]" />
             </div>
           </div>
 
-          {/* Location & Job Type */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" placeholder="e.g. Karachi, PK or Remote" className="rounded-xl" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="type">Job Type</Label>
-              <select className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="remote">Remote</option>
-                <option value="hybrid">Hybrid</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Salary Range */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="minSalary">Min Salary</Label>
-              <Input id="minSalary" type="number" placeholder="50000" className="rounded-xl" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="maxSalary">Max Salary</Label>
-              <Input id="maxSalary" type="number" placeholder="80000" className="rounded-xl" />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Job Description</Label>
-            <Textarea 
-              id="description" 
-              placeholder="Describe the roles and responsibilities..." 
-              className="rounded-xl min-h-[100px]"
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" className="rounded-xl">Cancel</Button>
-          <Button type="submit" className="rounded-xl px-8">Post Job</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => setOpen(false)} className="rounded-xl">Cancel</Button>
+            <Button type="submit" disabled={loading} className="rounded-xl px-8">
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Posting...</> : "Post Job"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
