@@ -6,6 +6,7 @@ import { DeleteConfirmModal } from "@/components/dashboard/DeleteConfirmModal";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card"; // ✅ Unused hataye
 import { redirect } from "next/navigation";
+import { deleteJobAction } from "@/src/actions/job.actions";
 
 export const dynamic = "force-dynamic"; // ✅ Updated
 
@@ -69,7 +70,7 @@ export default async function HRJobsPage() {
                         <EditJobModal job={job} />
                         <DeleteConfirmModal 
                           itemName={job.title} 
-                          jobId={job._id} 
+                          onDelete={() => deleteJobAction(job._id)} // onDelete mein action call kiya
                         />
                       </div>
                     </TableCell>

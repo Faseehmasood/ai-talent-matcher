@@ -1,5 +1,6 @@
 "use client"
-import { MoreVertical, Ban, CheckCircle, Eye, User } from "lucide-react"
+
+import { MoreVertical, Ban, CheckCircle, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,9 +10,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { DeleteConfirmModal } from "./DeleteConfirmModal"
-import { ApplicationDetailModal } from "./ApplicationDetailModal" // ✅ Pehle wala modal import kiya
+import { ApplicationDetailModal } from "./ApplicationDetailModal"
+// 1. Asli Actions import kiye ✅
+import { updateInterviewStatusAction, deleteInterviewAction } from "@/src/actions/interview.actions"
 
 export function InterviewActionMenu({ interview }: { interview: any }) {
+  
+  // 🛠️ HANDLER: Status Update (Completed) ✅
+  const handleStatusUpdate = async (status: string) => {
+    const response = await updateInterviewStatusAction(interview._id, status);
+    if (response.success) {
+      alert(`Interview marked as ${status}!`);
+    } else {
+      alert("Failed to update status");
+    }
+  };
+
+  // 🛠️ HANDLER: Cancel/Delete ✅
+  const handleCancel = async () => {
+    const response = await deleteInterviewAction(interview._id);
+    if (response.success) {
+      alert("Interview cancelled and removed.");
+    } else {
+      alert("Failed to cancel interview");
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,37 +46,37 @@ export function InterviewActionMenu({ interview }: { interview: any }) {
 
       <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-xl border-border/50 bg-card">
         
-        {/* 🛠️ FIX: View Details ab asli Modal kholay ga ✅ */}
+        {/* View Details Modal */}
         <div className="p-0">
           <ApplicationDetailModal 
             application={{
-              name: interview.candidate,
-              role: interview.role,
-              initials: interview.candidate.substring(0, 2).toUpperCase(),
+              name: interview.candidate?.name,
+              role: interview.job?.title,
+              initials: interview.candidate?.name?.substring(0, 2).toUpperCase(),
               status: interview.status,
-              date: interview.date,
-              level: "Applied Candidate"
+              date: new Date(interview.interviewDate).toLocaleDateString(),
+              level: "Scheduled Candidate"
             }} 
           />
         </div>
 
         <DropdownMenuSeparator className="my-1 opacity-50" />
 
-        {/* Mark as Done */}
+        {/* 🛠️ MARK AS DONE: Connect with Backend ✅ */}
         <DropdownMenuItem 
-          className="rounded-xl cursor-pointer gap-3 py-2.5 focus:bg-green-50 focus:text-green-600"
-          onClick={() => console.log("Updating to: completed")}
+          className="rounded-xl cursor-pointer gap-3 py-2.5 focus:bg-green-50 focus:text-green-600 font-medium"
+          onClick={() => handleStatusUpdate("completed")}
         >
           <CheckCircle className="w-4 h-4" />
-          <span className="font-bold text-sm">Mark as Done</span>
+          <span>Mark as Done</span>
         </DropdownMenuItem>
 
-        {/* Cancel Interview */}
+        {/* 🛠️ CANCEL INTERVIEW: Connect with Delete Action ✅ */}
         <div className="flex items-center w-full px-1 py-0.5 text-sm rounded-xl hover:bg-red-50 text-red-600 transition-colors mt-1">
             <Ban className="w-4 h-4 mr-3 ml-2" />
             <DeleteConfirmModal 
-              itemName={`Interview with ${interview.candidate}`} 
-              onDelete={() => console.log("Updating to: cancelled")} 
+              itemName={`Interview with ${interview.candidate?.name}`} 
+              onDelete={handleCancel} 
             />
             <span className="ml-1 font-bold">Cancel Interview</span>
         </div>

@@ -16,11 +16,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { CalendarDays, Clock, MapPin } from "lucide-react"
 
 interface ScheduleModalProps {
+  candidateId: string;
+  jobId: string;
   candidateName: string;
   jobTitle: string;
 }
 
-export function ScheduleModal({ candidateName, jobTitle }: ScheduleModalProps) {
+export function ScheduleModal({ candidateId, jobId, candidateName, jobTitle }: ScheduleModalProps) {
   return (
     <Dialog>
       {/* 1. Trigger Button - Jo table mein nazar aaye ga */}

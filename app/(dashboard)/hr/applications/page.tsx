@@ -1,190 +1,126 @@
-import { Search, Filter, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ApplicationDetailModal } from "@/components/dashboard/ApplicationDetailModal"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// 1. Modal import kiya ✅
-import { ScheduleModal } from "@/components/dashboard/ScheduleModal"
+import { getHRApplicationsAction } from "@/src/actions/application.actions";
+import { ApplicationDetailModal } from "@/components/dashboard/ApplicationDetailModal";
+import { ScheduleModal } from "@/components/dashboard/ScheduleModal";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { redirect } from "next/navigation";
 
-const applications = [
-  {
-    id: "A-001",
-    candidate: "Mirha Fatima",
-    initials: "MF",
-    job: "Frontend Developer",
-    appliedDate: "Apr 10, 2026",
-    status: "shortlisted",
-  },
-  {
-    id: "A-002",
-    candidate: "Ali Ahmed",
-    initials: "AA",
-    job: "Backend Developer",
-    appliedDate: "Apr 09, 2026",
-    status: "pending",
-  },
-  {
-    id: "A-003",
-    candidate: "Sara Khan",
-    initials: "SK",
-    job: "UI/UX Designer",
-    appliedDate: "Apr 08, 2026",
-    status: "reviewing",
-  },
-  {
-    id: "A-004",
-    candidate: "Ahmed Raza",
-    initials: "AR",
-    job: "DevOps Engineer",
-    appliedDate: "Apr 07, 2026",
-    status: "hired",
-  },
-  {
-    id: "A-005",
-    candidate: "Fatima Malik",
-    initials: "FM",
-    job: "React Developer",
-    appliedDate: "Apr 06, 2026",
-    status: "rejected",
-  },
-]
+//  ASLI MAGIC: Refresh logic
+export const revalidate = 0;
 
-const statusColor = (status: string) => {
-  switch (status) {
-    case "hired": return "bg-green-100 text-green-700"
-    case "shortlisted": return "bg-blue-100 text-blue-700"
-    case "reviewing": return "bg-yellow-100 text-yellow-700"
-    case "pending": return "bg-gray-100 text-gray-700"
-    case "rejected": return "bg-red-100 text-red-700"
-    default: return "bg-gray-100 text-gray-700"
+export default async function HRApplicationsPage() {
+  // 1. Database se real applications mangwao 
+  const response = await getHRApplicationsAction();
+
+  // 2. Security Barrier 
+  if (!response.success) {
+    if (response.code === "UNAUTHORIZED" || response.code === "TOKEN_EXPIRED") {
+      redirect("/login");
+    }
+    throw new Error("Failed to load applications");
   }
-}
 
-export default function HRApplicationsPage() {
+  const applications = response.applications || [];
+
+  // Helper: Status ke colors set karo
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "hired": return "bg-green-100 text-green-700";
+      case "shortlisted": return "bg-blue-100 text-blue-700";
+      case "rejected": return "bg-red-100 text-red-700";
+      default: return "bg-gray-100 text-gray-700";
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold">Applications</h1>
-        <p className="text-muted-foreground">
-          Manage candidate applications
-        </p>
+      {/* Header Section */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">Applications Manager</h1>
+        <p className="text-muted-foreground text-sm">You have {applications.length} total applicants to review.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {[
-          { label: "Total", value: 5, color: "bg-gray-100 text-gray-700" },
-          { label: "Pending", value: 1, color: "bg-gray-100 text-gray-700" },
-          { label: "Reviewing", value: 1, color: "bg-yellow-100 text-yellow-700" },
-          { label: "Shortlisted", value: 1, color: "bg-blue-100 text-blue-700" },
-          { label: "Hired", value: 1, color: "bg-green-100 text-green-700" },
-        ].map((stat) => (
-          <Card key={stat.label} className="rounded-2xl">
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold">{stat.value}</p>
-              <span className={`text-xs px-2 py-1 rounded-full ${stat.color}`}>
-                {stat.label}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Search + Filter */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search applications..."
-            className="pl-9 rounded-xl"
-          />
-        </div>
-        <Button variant="outline" className="gap-2">
-          <Filter className="w-4 h-4" />
-          Filter
-        </Button>
-      </div>
-
-      {/* Applications Table */}
-      <Card className="rounded-2xl">
-        <CardHeader>
-          <CardTitle>All Applications</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Card className="rounded-3xl border-border overflow-hidden shadow-sm bg-card">
+        <CardContent className="p-0">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-muted/10">
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Candidate</TableHead>
-                <TableHead>Job</TableHead>
-                <TableHead>Applied Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
+                <TableHead className="font-bold px-6">Candidate Details</TableHead>
+                <TableHead className="font-bold">Target Role</TableHead>
+                <TableHead className="font-bold">Apply Date</TableHead>
+                <TableHead className="font-bold">Status</TableHead>
+                <TableHead className="text-right px-8 font-bold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {applications.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {app.id}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-7 h-7">
-                        <AvatarFallback className="text-xs">
-                          {app.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">
-                        {app.candidate}
+              {applications.length > 0 ? (
+                applications.map((app: any) => (
+                  <TableRow key={app._id} className="border-border hover:bg-muted/5 transition-colors">
+                    {/*  ASLI DATA MAPPING  */}
+                    <TableCell className="px-6">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-9 h-9 border shadow-sm">
+                          <AvatarFallback className="text-[10px] font-bold bg-primary/5 text-primary">
+                            {app.candidate?.name?.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                           <span className="text-sm font-bold">{app.candidate?.name}</span>
+                           <span className="text-[10px] text-muted-foreground">{app.candidate?.email}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-sm font-medium">{app.job?.title}</TableCell>
+
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(app.createdAt).toLocaleDateString('en-GB')}
+                    </TableCell>
+
+                    <TableCell>
+                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase border-0 ${statusColor(app.status)}`}>
+                        {app.status}
                       </span>
-                    </div>
+                    </TableCell>
+
+                    <TableCell className="text-right px-6">
+                       <div className="flex items-center justify-end gap-2">
+                          {/*  WIRING MODALS WITH REAL DATA  */}
+                          <ApplicationDetailModal application={{
+                            id: app._id,
+                            name: app.candidate?.name,
+                            email: app.candidate?.email,
+                            role: app.job?.title,
+                            resume: app.resume,
+                            coverLetter: app.coverLetter,
+                            status: app.status,
+                            date: new Date(app.createdAt).toLocaleDateString(),
+                            initials: app.candidate?.name?.substring(0, 2).toUpperCase()
+                          }} />
+
+                          {/* Interview Schedule Modal */}
+                          <ScheduleModal 
+                            candidateId={app.candidate?._id} 
+                            jobId={app.job?._id} 
+                            candidateName={app.candidate?.name} 
+                            jobTitle={app.job?.title} 
+                          />
+                       </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-20 text-muted-foreground">
+                    No active applications found in your pipeline.
                   </TableCell>
-                  <TableCell className="text-sm">{app.job}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {app.appliedDate}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${statusColor(app.status)}`}>
-                      {app.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-  <div className="flex items-center gap-2">
-    <ApplicationDetailModal 
-      application={{
-        id: app.id,
-        name: app.candidate,
-        initials: app.initials,
-        role: app.job,
-        level: "Senior", 
-        date: app.appliedDate,
-        status: app.status
-      }} 
-    />
-    
-    <ScheduleModal 
-      candidateName={app.candidate} 
-      jobTitle={app.job} 
-    />
-  </div>
-</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
