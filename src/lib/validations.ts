@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { email, z } from "zod"
 
 // ==================
 // AUTH VALIDATIONS
@@ -98,10 +98,10 @@ export const interviewSchema = z.object({
 
 
 
-// ==================
+
 // TYPE EXPORTS
-// ==================
-// TypeScript types automatically ban jaate hain! ✅
+
+// TypeScript types automatically ban jaate hain! 
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type CreateJobInput = z.infer<typeof createJobSchema>

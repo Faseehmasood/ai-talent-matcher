@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { logoutAction } from "@/src/actions/user.actions"
 import { Bell, Upload, Search, Settings, Sun, Moon, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/src/store/useAuthStore"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "@/components/theme-provider" //  Sirf yeh badla
 import { CreateJobModal } from "../dashboard/CreateJobModal"
 import Link from "next/link"
@@ -21,6 +22,17 @@ export function Navbar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme() //  Same — kaam karega
   const { user } = useAuthStore()
+  const { logout } = useAuthStore()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const res=await logoutAction()
+    if(res.success){
+      logout()
+      router.push("/login")
+      router.refresh()
+    }
+  }
 
   // mounted aur useEffect hatao zaroorat nahi ab
 
@@ -131,7 +143,7 @@ export function Navbar() {
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 rounded-xl cursor-pointer font-bold py-2 focus:bg-red-50 focus:text-red-600">
+            <DropdownMenuItem onClick={() =>handleLogout()} className="text-red-500 rounded-xl cursor-pointer font-bold py-2 focus:bg-red-50 focus:text-red-600">
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

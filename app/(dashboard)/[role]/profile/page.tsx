@@ -27,7 +27,7 @@ export default function DynamicProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* 1. HIDDEN FILE INPUT (For Avatar Update) ✅ */}
+      {/* 1. HIDDEN FILE INPUT (For Avatar Update) */}
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -48,7 +48,7 @@ export default function DynamicProfilePage() {
            </div>
         </div>
         
-        {/* 🛠️ ASLI EDIT MODAL BUTTON (PROMINENT) ✅ */}
+        {/*  ASLI EDIT MODAL BUTTON (PROMINENT)  */}
         <EditProfileModal user={userData} />
       </div>
 
@@ -57,7 +57,7 @@ export default function DynamicProfilePage() {
         <Card className="rounded-[2.5rem] border-border bg-card shadow-sm h-fit overflow-hidden">
           <CardContent className="p-8 flex flex-col items-center">
             <div 
-              onClick={handleAvatarClick} // 🛠️ CLICK HANDLER ✅
+              onClick={handleAvatarClick} //  CLICK HANDLER 
               className="relative group cursor-pointer"
             >
               <Avatar className="w-40 h-40 border-4 border-muted transition-all group-hover:brightness-75">
