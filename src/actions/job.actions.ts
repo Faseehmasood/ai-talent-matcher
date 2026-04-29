@@ -6,7 +6,7 @@ import { cookies } from "next/headers"
 import { jwtVerify } from "jose"
 import { connection } from "next/server"
 import { revalidatePath } from "next/cache"
-import { createJobSchema, updateJobSchema } from "@/src/lib/validations" //  Dono schemas import kiye
+import { createJobSchema, updateJobSchema } from "@/src/lib/validations" 
 
 // Environment Variable Safety
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
@@ -14,7 +14,6 @@ if (!secretKey) {
   throw new Error("ACCESS_TOKEN_SECRET is not defined in .env file!");
 }
 const JWT_SECRET = new TextEncoder().encode(secretKey);
-
 
 //  PRIVATE HELPER: Token Verification
 
@@ -31,8 +30,8 @@ async function verifyToken() {
   }
 }
 
+// 1. GET MY JOBS (For HR Jobs Page)
 
-// 1. GET MY JOBS (List View) 
 export async function getMyJobsAction() {
   await connection()
   try {
@@ -54,8 +53,8 @@ export async function getMyJobsAction() {
   }
 }
 
+// 2. DELETE JOB ACTION
 
-// 2. DELETE JOB ACTION 
 export async function deleteJobAction(jobId: string) {
   await connection()
   try {
@@ -79,8 +78,8 @@ export async function deleteJobAction(jobId: string) {
   }
 }
 
+// 3. CREATE JOB ACTION
 
-// 3. CREATE JOB ACTION 
 export async function createJobAction(jobData: any) {
   await connection()
   try {
@@ -108,8 +107,7 @@ export async function createJobAction(jobData: any) {
   }
 }
 
-
-// 4. UPDATE JOB ACTION (The New Chunk) 
+// 4. UPDATE JOB ACTION
 
 export async function updateJobAction(jobId: string, updates: any) {
   await connection()
@@ -118,37 +116,49 @@ export async function updateJobAction(jobId: string, updates: any) {
     const { payload, error } = await verifyToken()
     if (error || !payload) return { success: false, code: error || "UNAUTHORIZED" }
 
-    //  ZOD VALIDATION: Partial updates allow karta hai 
     const result = updateJobSchema.safeParse(updates)
     if (!result.success) {
-      return { 
-        success: false, 
-        code: "VALIDATION_ERROR", 
-        message: result.error.issues[0].message 
-      }
+      return { success: false, code: "VALIDATION_ERROR", message: result.error.issues[0].message }
     }
 
-    // Logic: Database update with ownership check 
     const updatedJob = await Job.findOneAndUpdate(
-      { _id: jobId, postedBy: payload._id }, // Ensure this HR owns the job
-      { $set: result.data },                 // Sirf wahi data badlo jo aaya hai
-      { new: true }                          // Naya record return karo
+      { _id: jobId, postedBy: payload._id },
+      { $set: result.data },
+      { new: true }
     ).lean()
 
-    if (!updatedJob) {
-      return { success: false, code: "NOT_FOUND_OR_UNAUTHORIZED" }
-    }
+    if (!updatedJob) return { success: false, code: "NOT_FOUND_OR_UNAUTHORIZED" }
 
-    //  Refresh all views
     revalidatePath("/hr/jobs")
     revalidatePath("/hr/dashboard")
+    return { success: true, job: JSON.parse(JSON.stringify(updatedJob)) }
+  } catch (error: any) {
+    console.error("UPDATE_JOB_ERROR:", error.message)
+    return { success: false, code: "SERVER_ERROR" }
+  }
+}
+
+// 5. GET ALL ACTIVE JOBS (The New Chunk for Candidates)
+
+export async function getAllActiveJobsAction() {
+  // Iske liye login zaroori nahi hai (Public Explore) 
+  await connection()
+
+  try {
+    await connectDB()
+    
+    // Logic: Sirf 'active' jobs uthao poore platform se
+    const jobs = await Job.find({ status: "active" })
+      .populate("postedBy", "name email") // Taake company/recruiter ka naam nazar aaye
+      .sort({ createdAt: -1 })
+      .lean()
 
     return {
       success: true,
-      job: JSON.parse(JSON.stringify(updatedJob))
-    }
+      jobs: JSON.parse(JSON.stringify(jobs))
+    };
   } catch (error: any) {
-    console.error("UPDATE_JOB_ERROR:", error.message)
+    console.error("GET_ACTIVE_JOBS_ERROR:", error.message)
     return { success: false, code: "SERVER_ERROR" }
   }
 }

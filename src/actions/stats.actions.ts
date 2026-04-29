@@ -6,7 +6,7 @@ import { Interview } from "@/src/models/interview.model";
 import { User } from "@/src/models/users.model";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import { unstable_noStore as noStore } from "next/cache";
+import { unstable_noStore as noStore} from "next/cache"
 
 const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
 const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -31,9 +31,9 @@ export async function getDashboardStatsAction() {
     const userId = payload._id as string;
     const role = payload.role as string;
 
-    // ==========================================
-    // 1. HR STATS ✅
-    // ==========================================
+    
+    // 1. HR STATS 
+    
     if (role === "hr") {
       // Step 1: Teen cheezein ek saath fetch karo
       const [totalJobs, totalInterviews, jobIds] = await Promise.all([
@@ -86,9 +86,9 @@ export async function getDashboardStatsAction() {
       };
     }
 
-    // ==========================================
-    // 2. ADMIN STATS ✅
-    // ==========================================
+
+    // 2. ADMIN STATS 
+    
     if (role === "admin") {
       const [totalUsers, totalJobs, totalApplications] = await Promise.all([
         User.countDocuments(),
@@ -104,19 +104,21 @@ export async function getDashboardStatsAction() {
       };
     }
 
-    // ==========================================
-    // 3. CANDIDATE STATS ✅
-    // ==========================================
+
+    // 3. CANDIDATE STATS 
+    
     if (role === "candidate") {
-      const [totalApplied, shortlisted, interviews] = await Promise.all([
+      const [totalApplied, shortlisted, interviews, pending, rejected] = await Promise.all([
         Application.countDocuments({ candidate: userId }),
         Application.countDocuments({ candidate: userId, status: "shortlisted" }),
         Interview.countDocuments({ candidate: userId }),
+        Application.countDocuments({ candidate: userId, status: "pending" }),
+        Application.countDocuments({ candidate: userId, status: "rejected" }),
       ]);
 
       return {
         success: true,
-        stats: { totalApplied, shortlisted, interviews },
+        stats: { totalApplied, shortlisted, interviews, pending, rejected },
         chartData: [],
         recentApplications: [],
       };

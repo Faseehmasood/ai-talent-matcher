@@ -5,14 +5,14 @@ import { RecentApplications } from "@/components/dashboard/RecentApplications";
 import { Briefcase, Users, Eye } from "lucide-react";
 import { redirect } from "next/navigation";
 
-// 🛠️ ASLI MAGIC: Har baar database se tazza (fresh) data mangwao ✅
+//  ASLI MAGIC: Har baar database se tazza (fresh) data mangwao 
 export const revalidate = 0;
 
 export default async function HRDashboardPage() {
-  // 1. Database se poora data parallel mangwao ⚡
+  // 1. Database se poora data parallel mangwao 
   const response = await getDashboardStatsAction();
 
-  // 2. Security Barrier: Failure cases handle karo 🛡️
+  // 2. Security Barrier: Failure cases handle karo 
   if (!response.success) {
     if (response.code === "UNAUTHORIZED" || response.code === "TOKEN_EXPIRED") {
       redirect("/login");
@@ -21,7 +21,7 @@ export default async function HRDashboardPage() {
     throw new Error(response.code || "Failed to load dashboard data");
   }
 
-  // 3. Data Extraction (TypeScript Safe) 📊
+  // 3. Data Extraction (TypeScript Safe) 
   const stats = response.stats || {
     totalJobs: 0,
     totalApplications: 0,
@@ -43,7 +43,7 @@ export default async function HRDashboardPage() {
         </p>
       </div>
 
-      {/* 4. ASLI STATS CARDS ✅ */}
+      {/* 4. ASLI STATS CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard 
           title="Total opened jobs" 
@@ -62,12 +62,12 @@ export default async function HRDashboardPage() {
         />
       </div>
 
-      {/* 5. ASLI MONTHLY CHART ✅ */}
+      {/* 5. ASLI MONTHLY CHART  */}
       <div className="w-full">
         <Chart data={chartData} />
       </div>
 
-      {/* 6. ASLI RECENT APPLICATIONS TABLE ✅ */}
+      {/* 6. ASLI RECENT APPLICATIONS TABLE  */}
       <div className="pt-2">
         <RecentApplications applications={recentApps} />
       </div>
