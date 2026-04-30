@@ -171,7 +171,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
               {/* Actions */}
               <div className="flex gap-3 pt-2">
                  <Button type="button" variant="outline" onClick={() => setStep("view")} className="flex-1 rounded-xl h-12 font-bold">Back</Button>
-                 <Button type="submit" disabled={loading} className="flex-[2] rounded-xl h-12 font-black shadow-lg shadow-primary/20">
+                 <Button type="submit" disabled={loading} className="flex-2 rounded-xl h-12 font-black shadow-lg shadow-primary/20">
                    {loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Processing...</> : "Submit Application"}
                  </Button>
               </div>
