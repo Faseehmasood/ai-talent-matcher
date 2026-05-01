@@ -23,7 +23,7 @@ export async function registerUserAction(formData: any) {
     }
 
     // 3. Check karo banda pehle se toh nahi hai?
-    const { name, email, password, role } = result.data;
+    const { name, email, password, role, phoneNumber } = result.data;
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -36,7 +36,9 @@ export async function registerUserAction(formData: any) {
       name,
       email,
       password,
-      role
+      role,
+      phoneNumber,
+      
     });
 
     // 5. Response bhejo (Password hata kar) 
@@ -47,7 +49,8 @@ export async function registerUserAction(formData: any) {
         _id: newUser._id.toString(),
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
+        phoneNumber: newUser.phoneNumber
       }
     };
 

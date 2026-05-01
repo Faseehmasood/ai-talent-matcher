@@ -61,10 +61,10 @@ export async function getDashboardStatsAction() {
 
           // Recent 5 applications
           Application.find({ job: { $in: jobIds } })
-            .populate("candidate", "name email avatar") // Candidate info
-            .populate("job", "title")                   // Job title
-            .sort({ createdAt: -1 })                    // Naye pehle
-            .limit(5)                                   // Sirf 5
+            .populate("candidate", "name email avatar phoneNumber") 
+            .populate("job", "title")                   
+            .sort({ createdAt: -1 })                    
+            .limit(5)                                   
             .lean(),                                    // Fast plain object
         ]);
 

@@ -21,6 +21,11 @@ export const registerSchema = z.object({
   role: z
     .enum(["admin", "hr", "candidate"])
     .default("candidate"),
+
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits!")
+    .max(15, "Phone number too long!"),  
 })
 
 export const loginSchema = z.object({

@@ -59,6 +59,10 @@ export function RecentApplications({ applications }: RecentApplicationsProps) {
                     <ApplicationDetailModal application={{
                       name: app.candidate?.name,
                       role: app.job?.title,
+                      email: app.candidate?.email,
+                      phone: app.candidate?.phoneNumber,
+                      resume: app.resume,
+                      coverLetter: app.coverLetter,
                       status: app.status,
                       date: new Date(app.createdAt).toLocaleDateString(),
                       initials: app.candidate?.name?.substring(0, 2).toUpperCase()

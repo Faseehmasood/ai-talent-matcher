@@ -1,88 +1,134 @@
-import { NextRequest, NextResponse } from "next/server"
-import { Job } from "@/src/models/job.model"
-import { Application } from "@/src/models/application.model"
-import { Interview } from "@/src/models/interview.model"
-import { User } from "@/src/models/users.model"
-import { ApiResponse } from "@/src/utils/ApiResponse"
-import { ApiError } from "@/src/utils/ApiError"
-import { asyncHandler } from "@/src/utils/asyncHandler"
-import { verifyJWT } from "@/src/middleware/auth"
-import connectDB from "@/src/lib/db"
+"use server";
+import connectDB from "@/src/lib/db";
+import { Job } from "@/src/models/job.model";
+import { Application } from "@/src/models/application.model";
+import { Interview } from "@/src/models/interview.model";
+import { User } from "@/src/models/users.model";
+import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
+import { unstable_noStore as noStore } from "next/cache";
 
-export const getDashboardStats = asyncHandler(async (req: NextRequest) => {
-  await connectDB()
-  const user = await verifyJWT(req)
+const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
+const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  // 1. Security Check: Sirf HR aur Admin allowed hain
-  if (user.role !== "admin" && user.role !== "hr") {
-    throw new ApiError(403, "Only HR and Admin can access dashboard stats!")
-  }
+export async function getDashboardStatsAction() {
+  noStore();
 
-  // 2. Logic for Admin
-  if (user.role === "admin") {
-    const stats = {
-      totalUsers: await User.countDocuments(),
-      totalJobs: await Job.countDocuments(),
-      totalApplications: await Application.countDocuments(),
+  try {
+    await connectDB();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
+    if (!token) return { success: false, code: "UNAUTHORIZED" };
+
+    let payload: any;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch {
+      return { success: false, code: "TOKEN_EXPIRED" };
     }
-    return NextResponse.json(new ApiResponse(200, stats, "Admin Stats fetched!"))
-  }
 
-  // 3. Logic for HR (Agar yahan tak pohancha hai toh matlab HR hi hai)
-  const myJobs = await Job.find({ postedBy: user._id }).select("_id")
-  const jobIds = myJobs.map(job => job._id)
+    const userId = payload._id as string;
+    const role = payload.role as string;
 
-  const stats = {
-    totalJobs: myJobs.length,
-    totalApplications: await Application.countDocuments({ job: { $in: jobIds } }),
-    totalInterviews: await Interview.countDocuments({ interviewer: user._id }),
-  }
+    // ==========================================
+    // 1. HR STATS
+    // ==========================================
+    if (role === "hr") {
+      const [totalJobs, totalInterviews, jobIds] = await Promise.all([
+        Job.countDocuments({ postedBy: userId }),
+        Interview.countDocuments({ interviewer: userId }),
+        Job.find({ postedBy: userId }).distinct("_id"),
+      ]);
 
-  return NextResponse.json(new ApiResponse(200, stats, "HR Stats fetched!"))
-})
+      let totalApplications = 0;
+      let chartData: { month: string; applicants: number }[] = [];
+      let recentApplications: any[] = [];
 
-// Yahan hum MongoDB Aggregation use kar rahe hain (Advanced Data Mining)
-export const getChartStats = asyncHandler(async (req: NextRequest) => {
-  await connectDB()
-  const user = await verifyJWT(req)
+      if (totalJobs > 0) {
+        const [appCount, monthlyData, recentAppsData] = await Promise.all([
+          
+          // Total applications count
+          Application.countDocuments({ job: { $in: jobIds } }),
 
-  // Security: Sirf HR aur Admin stats dekh saken
-  if (user.role !== "hr" && user.role !== "admin") {
-    throw new ApiError(403, "Not authorized!")
-  }
+          // Chart ke liye monthly data
+          Application.aggregate([
+            { $match: { job: { $in: jobIds } } },
+            { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
+            { $sort: { _id: 1 } },
+          ]),
 
-  // 1. Pehle HR ki saari Jobs ki IDs nikaalo (Scaling logic)
-  const myJobs = await Job.find({ postedBy: user._id }).select("_id")
-  const jobIds = myJobs.map(job => job._id)
+          //  FIX 1: .select() add kiya taake resume field aaye
+          //  FIX 2: phoneNumber populate mein add kiya
+          Application.find({ job: { $in: jobIds } })
+            .select("resume coverLetter status createdAt candidate job")
+            .populate("candidate", "name email phoneNumber avatar")
+            .populate("job", "title")
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .lean(),
+        ]);
 
-  // 2. Aggregation Pipeline (Asli Magic ✨)
-  const chartData = await Application.aggregate([
-    {
-      // Stage 1: Sirf woh applications lo jo is HR ki jobs par hain
-      $match: { job: { $in: jobIds } }
-    },
-    {
-      // Stage 2: Har application ki 'createdAt' date se Mahina (Month) nikalo
-      $group: {
-        _id: { $month: "$createdAt" }, // 1 for Jan, 2 for Feb etc.
-        count: { $sum: 1 }             // Har record par +1 karo
+        totalApplications = appCount;
+
+        chartData = monthlyData.map((item) => ({
+          month: monthNames[item._id - 1],
+          applicants: item.count,
+        }));
+
+        recentApplications = JSON.parse(JSON.stringify(recentAppsData));
       }
-    },
-    {
-      // Stage 3: Results ko Month ke hisaab se seedha (Sort) karo
-      $sort: { "_id": 1 }
+
+      return {
+        success: true,
+        stats: { totalJobs, totalApplications, totalInterviews },
+        chartData,
+        recentApplications,
+      };
     }
-  ])
 
-  // Month numbers (1, 2) ko Names (Jan, Feb) mein badalne ke liye:
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  
-  const formattedData = chartData.map(item => ({
-    month: monthNames[item._id - 1],
-    applicants: item.count
-  }))
+    // ==========================================
+    // 2. ADMIN STATS
+    // ==========================================
+    if (role === "admin") {
+      const [totalUsers, totalJobs, totalApplications] = await Promise.all([
+        User.countDocuments(),
+        Job.countDocuments(),
+        Application.countDocuments(),
+      ]);
 
-  return NextResponse.json(
-    new ApiResponse(200, formattedData, "Chart data fetched successfully!")
-  )
-})
+      return {
+        success: true,
+        stats: { totalUsers, totalJobs, totalApplications },
+        chartData: [],
+        recentApplications: [],
+      };
+    }
+
+    // ==========================================
+    // 3. CANDIDATE STATS
+    // ==========================================
+    if (role === "candidate") {
+      const [totalApplied, shortlisted, interviews, pending, rejected] = await Promise.all([
+        Application.countDocuments({ candidate: userId }),
+        Application.countDocuments({ candidate: userId, status: "shortlisted" }),
+        Interview.countDocuments({ candidate: userId }),
+        Application.countDocuments({ candidate: userId, status: "pending" }),
+        Application.countDocuments({ candidate: userId, status: "rejected" }),
+      ]);
+
+      return {
+        success: true,
+        stats: { totalApplied, shortlisted, interviews, pending, rejected },
+        chartData: [],
+        recentApplications: [],
+      };
+    }
+
+    return { success: false, code: "INVALID_ROLE" };
+
+  } catch (error: any) {
+    console.error("STATS_FETCH_ERROR:", error.message);
+    return { success: false, code: "SERVER_ERROR" };
+  }
+}

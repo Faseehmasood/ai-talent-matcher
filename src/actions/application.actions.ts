@@ -42,7 +42,8 @@ export async function getHRApplicationsAction() {
     if (myJobIds.length === 0) return { success: true, applications: [] };
 
     const applications = await Application.find({ job: { $in: myJobIds } })
-      .populate("candidate", "name email avatar")
+      .select("resume coverLetter status createdAt candidate job") //  FIX
+      .populate("candidate", "name email phoneNumber avatar")      //  FIX
       .populate("job", "title")
       .sort({ createdAt: -1 })
       .limit(50)
@@ -145,6 +146,7 @@ export async function applyForJobAction(formData: FormData) {
     const arrayBuffer = await resumeFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const resumeUrl = await uploadOnCloudinary(buffer, resumeFile.name);
+    console.log("Uploaded Resume URL:", resumeUrl)
     
     if (!resumeUrl) return { success: false, message: "Upload failed. Try again." };
 
