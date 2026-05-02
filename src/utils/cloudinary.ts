@@ -8,7 +8,7 @@ cloudinary.config({
 
 export const uploadOnCloudinary = async (buffer: Buffer, filename: string) => {
   try {
-    // Extension saaf karo taake .pdf.pdf na banay ✅
+    // Extension saaf karo taake .pdf.pdf na banay 
     const cleanFileName = filename.split('.').slice(0, -1).join('.') || filename;
 
     const response = await new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ export const uploadOnCloudinary = async (buffer: Buffer, filename: string) => {
       uploadStream.end(buffer);
     });
 
-    return (response as any).secure_url; // Direct HTTPS URL ✅
+    return (response as any).secure_url; // Direct HTTPS URL
   } catch (error) {
     return null;
   }

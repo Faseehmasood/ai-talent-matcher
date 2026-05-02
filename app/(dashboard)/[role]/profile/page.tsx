@@ -9,7 +9,7 @@ import { EditProfileModal } from "@/components/dashboard/EditProfileModal"
 export default function DynamicProfilePage() {
   const params = useParams()
   const role = params.role
-  const fileInputRef = useRef<HTMLInputElement>(null) // 🛠️ Hidden input ke liye ref
+  const fileInputRef = useRef<HTMLInputElement>(null) // Hidden input ke liye ref
 
   // Mock User Data
   const [userData, setUserData] = useState({
