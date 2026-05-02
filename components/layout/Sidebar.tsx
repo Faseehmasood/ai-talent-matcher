@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { useAuthStore } from "@/src/store/useAuthStore"
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" 
 import {
   LayoutDashboard,
   Briefcase,
@@ -27,7 +28,7 @@ import {
   FileText
 } from "lucide-react"
 
-// Menu Configs
+
 const hrMainMenu = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/hr/dashboard" },
   { title: "Jobs", icon: Briefcase, url: "/hr/jobs" },
@@ -60,8 +61,8 @@ const adminMainMenu = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { user } = useAuthStore() //  Asli user data nikaalo store se
   
-  // Asli Role Detection Logic
   const role = pathname.startsWith("/admin") 
   ? "admin" 
   : pathname.startsWith("/candidate") 
@@ -73,6 +74,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      {/* Logo Section */}
       <SidebarHeader className="p-4 border-b border-border/50">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -91,7 +93,7 @@ export function AppSidebar() {
           <SidebarMenu className="px-2">
             {mainMenu.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url} className="rounded-xl px-4 py-6 transition-all">
+                <SidebarMenuButton asChild isActive={pathname === item.url} className="rounded-xl px-4 py-6 transition-all hover:bg-muted">
                   <a href={item.url} className="flex items-center gap-3">
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium text-sm">{item.title}</span>
@@ -108,7 +110,7 @@ export function AppSidebar() {
             <SidebarMenu className="px-2">
               {hrJobManager.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} className="rounded-xl px-4 py-6 transition-all">
+                  <SidebarMenuButton asChild isActive={pathname === item.url} className="rounded-xl px-4 py-6 transition-all hover:bg-muted">
                     <a href={item.url} className="flex items-center gap-3">
                       <item.icon className="w-5 h-5" />
                       <span className="font-medium text-sm">{item.title}</span>
@@ -121,12 +123,23 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
+      {/* Sidebar Footer — Asli User Profile  */}
       <SidebarFooter className="p-4 border-t border-border/50">
         <div className="flex items-center gap-3 bg-muted/50 p-2 rounded-2xl">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-bold">ST</div>
-          <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-bold truncate">Spare Team</p>
-            <p className="text-[10px] text-muted-foreground truncate uppercase font-medium">Agency Plan</p>
+          
+          {/*  ASLI IMAGE IN SIDEBAR FOOTER */}
+          <Avatar className="w-8 h-8 border border-border shadow-sm">
+             <AvatarImage src={user?.avatar} className="object-cover" />
+             <AvatarFallback className="bg-primary text-white text-[10px] font-bold">
+                {user?.name?.substring(0, 2).toUpperCase() || "UN"}
+             </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 overflow-hidden text-left">
+            <p className="text-xs font-bold truncate text-foreground">{user?.name || "Guest User"}</p>
+            <p className="text-[10px] text-muted-foreground truncate uppercase font-medium">
+              {user?.role || "Active Account"}
+            </p>
           </div>
         </div>
       </SidebarFooter>

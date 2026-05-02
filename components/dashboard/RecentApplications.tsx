@@ -66,7 +66,9 @@ export function RecentApplications({ applications }: RecentApplicationsProps) {
                       status: app.status,
                       date: new Date(app.createdAt).toLocaleDateString(),
                       initials: app.candidate?.name?.substring(0, 2).toUpperCase()
-                    }} />
+                    }}
+                    hideActions={true} 
+                    />
                   </TableCell>
                 </TableRow>
               ))

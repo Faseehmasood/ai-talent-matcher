@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { updateProfileAction } from "@/src/actions/user.actions"
+import { useAuthStore } from "@/src/store/useAuthStore" // ✅ Memory Store import kiya
 import {
   Dialog,
   DialogContent,
@@ -28,40 +29,51 @@ interface EditProfileProps {
 export function EditProfileModal({ user }: EditProfileProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  
+  // 🛠️ ASLI WIRING: Zustand se setAuth function nikalo ✅
+  const setAuth = useAuthStore((state) => state.setAuth)
 
-  // 1. Form State: Purane data se start karo 
+  // 1. Form State: Initial values from props
   const [formData, setFormData] = useState({
     name: user.name || "",
     bio: user.bio || "",
     phoneNumber: user.phone || ""
   })
 
-  // 2. Submit Logic 
+  // 2. Submit Logic 🚀
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    const response = await updateProfileAction(formData)
+    try {
+      const response = await updateProfileAction(formData)
 
-    if (response.success) {
-      alert("Profile updated successfully! ✨")
-      setOpen(false) // Modal band kar do
-    } else {
-      alert(response.message || "Failed to update profile")
+      if (response.success && response.user) {
+        // 🚀 MAGIC: Foran Zustand memory update karo! ✅
+        // Isse Profile page ka text foran badal jaye ga refresh ke baghair
+        setAuth(response.user) 
+        
+        alert("Profile updated successfully! ✨")
+        setOpen(false) // Modal band kar do
+      } else {
+        alert(response.message || "Failed to update profile")
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* Trigger Button */}
       <DialogTrigger asChild>
         <Button variant="outline" className="rounded-xl gap-2 border-primary/20 text-primary hover:bg-primary/5 font-bold px-6">
           <Edit3 className="w-4 h-4" /> Edit Profile
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border shadow-2xl">
+      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border shadow-2xl bg-card">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold tracking-tight">Update Profile</DialogTitle>
