@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { updateProfileAction } from "@/src/actions/user.actions"
-import { useAuthStore } from "@/src/store/useAuthStore" // ✅ Memory Store import kiya
+import { useAuthStore } from "@/src/store/useAuthStore" 
 import {
   Dialog,
   DialogContent,
@@ -16,45 +16,55 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Edit3, User, Phone, Info, Loader2 } from "lucide-react"
+import { Edit3, User, Phone, Info, Loader2, Code2 } from "lucide-react"
 
 interface EditProfileProps {
   user: {
     name: string;
     bio?: string;
     phone?: string;
+    skills?: string[]; //  Backend se array aayegi
+
   };
+  role: string;
 }
 
-export function EditProfileModal({ user }: EditProfileProps) {
+export function EditProfileModal({ user,role }: EditProfileProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   
-  // 🛠️ ASLI WIRING: Zustand se setAuth function nikalo ✅
   const setAuth = useAuthStore((state) => state.setAuth)
 
-  // 1. Form State: Initial values from props
+  // 1. Form State Initialization 
   const [formData, setFormData] = useState({
     name: user.name || "",
     bio: user.bio || "",
-    phoneNumber: user.phone || ""
+    phoneNumber: user.phone || "",
+    //  REASONING: Array ko string mein badlo taake input mein nazar aaye 
+    skills: user.skills?.join(", ") || "" 
   })
 
-  // 2. Submit Logic 🚀
+  // 2. Submit Logic 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const response = await updateProfileAction(formData)
+      //  DATA TRANSFORMATION 
+      // String "React, Node" ko badal kar ["React", "Node"] kar do
+      const finalData = {
+        ...formData,
+        skills: formData.skills 
+          ? formData.skills.split(",").map(s => s.trim()).filter(s => s !== "") 
+          : []
+      }
+
+      const response = await updateProfileAction(finalData)
 
       if (response.success && response.user) {
-        // 🚀 MAGIC: Foran Zustand memory update karo! ✅
-        // Isse Profile page ka text foran badal jaye ga refresh ke baghair
         setAuth(response.user) 
-        
-        alert("Profile updated successfully! ✨")
-        setOpen(false) // Modal band kar do
+        alert("Profile updated successfully! ")
+        setOpen(false) 
       } else {
         alert(response.message || "Failed to update profile")
       }
@@ -78,13 +88,13 @@ export function EditProfileModal({ user }: EditProfileProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold tracking-tight">Update Profile</DialogTitle>
             <DialogDescription>
-              Modify your public information and how others see you on the platform.
+              Keep your professional info up to date to attract better opportunities.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-6 py-6">
+          <div className="grid gap-5 py-6">
             {/* Full Name */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <User className="w-3.5 h-3.5" /> Full Name
               </Label>
@@ -92,32 +102,48 @@ export function EditProfileModal({ user }: EditProfileProps) {
                 required
                 value={formData.name} 
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="rounded-xl h-11 border-border/60 focus-visible:ring-primary/20" 
+                className="rounded-xl h-11 border-border/60" 
               />
             </div>
             
-            {/* Bio / Headline */}
-            <div className="space-y-2">
+            {/* Bio */}
+            <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                <Info className="w-3.5 h-3.5" /> Professional Bio
+                <Info className="w-3.5 h-3.5" /> Bio / Headline
               </Label>
               <Textarea 
                 value={formData.bio} 
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                className="rounded-xl min-h-[100px] border-border/60 focus-visible:ring-primary/20" 
-                placeholder="Briefly describe your role or expertise..." 
+                className="rounded-xl min-h-[80px] border-border/60" 
+                placeholder="Briefly describe your role..." 
               />
             </div>
 
+            {/*  NEW: SKILLS INPUT  */}
+            {role === "candidate" && (
+            <div className="space-y-1.5">
+              <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Code2 className="w-3.5 h-3.5" /> Skills (Comma separated)
+              </Label>
+              <Input 
+                value={formData.skills} 
+                onChange={(e) => setFormData({...formData, skills: e.target.value})}
+                placeholder="React, Node, TypeScript"
+                className="rounded-xl h-11 border-border/60" 
+              />
+              <p className="text-[10px] text-muted-foreground px-1 italic">Separate each skill with a comma.</p>
+            </div>
+          )}
+
             {/* Phone Number */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5" /> Phone Number
               </Label>
               <Input 
                 value={formData.phoneNumber} 
                 onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                className="rounded-xl h-11 border-border/60 focus-visible:ring-primary/20" 
+                className="rounded-xl h-11 border-border/60" 
                 placeholder="+92 ..." 
               />
             </div>

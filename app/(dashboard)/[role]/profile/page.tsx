@@ -76,8 +76,11 @@ export default function DynamicProfilePage() {
         {user && <EditProfileModal user={{
           name: user.name,
           bio: (user as any).bio,
-          phone: (user as any).phoneNumber
-        }} />}
+          phone: (user as any).phoneNumber,
+          skills: (user as any).skills,
+        }}
+        role={role} 
+         />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

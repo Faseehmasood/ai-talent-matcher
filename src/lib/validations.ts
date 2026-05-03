@@ -37,9 +37,9 @@ export const loginSchema = z.object({
     .min(1, "Password is required!"),
 })
 
-// ==================
+
 // JOB VALIDATIONS
-// ==================
+
 export const createJobSchema = z.object({
   title: z
     .string()
@@ -72,11 +72,10 @@ export const createJobSchema = z.object({
 })
 
 export const updateJobSchema = createJobSchema.partial()
-// .partial() = Sab fields optional ho jaate hain! ✅
+// .partial() = Sab fields optional ho jaate hain! 
 
-// ==================
 // APPLICATION VALIDATIONS
-// ==================
+
 export const applicationSchema = z.object({
   jobId: z.string().min(1, "Job ID is required!"),
   coverLetter: z
@@ -121,6 +120,7 @@ export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   bio: z.string().max(150).optional(),
   phoneNumber: z.string().optional(),
+  skills: z.array(z.string()).optional(),
 })
 
 // 2. Password Change

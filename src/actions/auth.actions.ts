@@ -124,7 +124,12 @@ export async function loginUserAction(formData: any) {
         _id: user._id.toString(),
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        
+        avatar: user.avatar || "",           
+        bio: user.bio || "",                 
+        phoneNumber: user.phoneNumber || "",
+        skills: user.skills || [], 
       }
     };
 

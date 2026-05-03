@@ -6,7 +6,7 @@ import { Eye, FileText, Mail, Phone, Calendar, Download, UserCheck, UserX, Loade
 import { Badge } from "@/components/ui/badge"
 import { updateApplicationStatusAction } from "@/src/actions/application.actions"
 
-// 🛠️ REASONING: Hum ne 'hideActions' prop add kiya ✅
+//  REASONING: Hum ne 'hideActions' prop add kiya 
 // Default value 'false' rakhi taake applications page par buttons nazar aayen.
 export function ApplicationDetailModal({ 
   application, 
@@ -100,7 +100,7 @@ export function ApplicationDetailModal({
             </Button>
           </div>
 
-          {/* 🛠️ ASLI LOGIC: Agar hideActions 'false' hai, sirf tab dikhao ✅ */}
+          {/*  ASLI LOGIC: Agar hideActions 'false' hai, sirf tab dikhao  */}
           {!hideActions && (
             <div className="pt-6 border-t border-border/50 grid grid-cols-2 gap-3">
               <Button 

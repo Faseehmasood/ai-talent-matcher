@@ -39,6 +39,8 @@ export async function updateProfileAction(data: any) {
     await connectDB();
     const { payload, error } = await verifyToken();
     if (error || !payload) return { success: false, message: error || "UNAUTHORIZED" };
+    console.log("DATA:", data)           // ← YEH ADD KARO
+    console.log("SKILLS:", data.skills)
 
     // Zod Validation Check
     const result = updateProfileSchema.safeParse(data);
@@ -51,9 +53,13 @@ export async function updateProfileAction(data: any) {
       { new: true } 
     ).select("-password");
 
+    console.log("UPDATED USER SKILLS:", updatedUser?.skills)
+    console.log("UPDATED USER:", updatedUser)
+
     if (!updatedUser) return { success: false, message: "User not found" };
 
     revalidatePath("/profile"); 
+    revalidatePath("/hr/candidates");
     
     //  ASLI KAAM: Naya user data bhej rahe hain taake Zustand update ho sakay
     return { 
@@ -144,6 +150,40 @@ export async function updateUserAvatarAction(formData: FormData) {
       user: JSON.parse(JSON.stringify(updatedUser)) // Zustand sync ke liye
     };
   } catch (error) {
+    return { success: false, message: "Server Error" };
+  }
+}
+
+// Toggle user status (HR/Admin only)
+
+export async function toggleUserStatusAction(userId: string) {
+  try {
+    await connectDB();
+    const { payload, error } = await verifyToken();
+    if (error || !payload) return { success: false, message: error || "UNAUTHORIZED" };
+
+    // SECURITY LOCK: Sirf HR ya Admin hi status badal saktay hain
+    if (payload.role !== "admin" && payload.role !== "hr") {
+      return { success: false, message: "Forbidden: Unauthorized action" };
+    }
+
+    const targetUser = await User.findById(userId);
+    if (!targetUser) return { success: false, message: "User not found" };
+
+    // LOGIC: Status ko toggle karo (true -> false | false -> true) 
+    targetUser.isActive = !targetUser.isActive;
+    await targetUser.save({ validateBeforeSave: false });
+
+    // Refresh saare relevant pages
+    revalidatePath("/hr/candidates");
+    revalidatePath("/admin/users");
+
+    return { 
+      success: true, 
+      message: targetUser.isActive ? "User Activated!" : "User Archived successfully!" 
+    };
+  } catch (error: any) {
+    console.error("TOGGLE_STATUS_ERROR:", error.message);
     return { success: false, message: "Server Error" };
   }
 }

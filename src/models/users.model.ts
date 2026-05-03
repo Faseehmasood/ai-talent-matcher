@@ -14,6 +14,7 @@ export interface IUser extends Document {
   phoneNumber?: string
   createdAt: Date
   updatedAt: Date
+  skills?: string[]
   comparePassword(password: string): Promise<boolean>
   generateAccessToken(): string
   generateRefreshToken(): string 
@@ -63,6 +64,10 @@ phoneNumber: {
   type: String,
   default: ""
 },
+skills: {          
+      type: [String],  
+      default: []      
+    },
   },
   {
     timestamps: true,
