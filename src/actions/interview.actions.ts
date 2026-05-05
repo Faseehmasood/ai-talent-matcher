@@ -2,15 +2,23 @@
 
 import connectDB from "@/src/lib/db";
 import { Interview } from "@/src/models/interview.model";
+import { Application } from "@/src/models/application.model"; // Sync ke liye
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { connection } from "next/server";
 import { revalidatePath } from "next/cache";
-import { interviewSchema } from "@/src/lib/validations"; 
+import { interviewSchema } from "@/src/lib/validations";
+import { createNotification } from "@/src/actions/notification.actions"; 
 
-const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
+// Environment Safety
+const secretKey = process.env.ACCESS_TOKEN_SECRET;
+if (!secretKey) {
+  throw new Error("ACCESS_TOKEN_SECRET is missing in .env!");
+}
+const JWT_SECRET = new TextEncoder().encode(secretKey);
 
-// HELPER: Centralized Token Verification
+//  HELPER: Token Verification
+
 async function verifyToken() {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
@@ -24,8 +32,7 @@ async function verifyToken() {
 }
 
 
-// 1. GET MY SCHEDULE 
-
+// 1. GET MY SCHEDULE (HR & Candidate Sync) 
 export async function getMyScheduleAction() {
   await connection();
   try {
@@ -33,9 +40,16 @@ export async function getMyScheduleAction() {
     const { payload, error } = await verifyToken();
     if (error || !payload) return { success: false, code: error || "UNAUTHORIZED" };
 
-    const interviews = await Interview.find({ interviewer: payload._id })
+    const userId = payload._id as string;
+    const role = payload.role as string;
+
+    // Role-based filtering logic
+    let queryFilter = role === "hr" ? { interviewer: userId } : { candidate: userId };
+
+    const interviews = await Interview.find(queryFilter)
       .populate("candidate", "name email avatar")
-      .populate("job", "title")
+      .populate("interviewer", "name email avatar")
+      .populate("job", "title company")
       .sort({ interviewDate: 1, startTime: 1 })
       .lean();
 
@@ -48,8 +62,8 @@ export async function getMyScheduleAction() {
   }
 }
 
-// 2. CREATE INTERVIEW (With Zod & Mapping) 
 
+// 2. CREATE INTERVIEW (With Notification Trigger) 
 export async function createInterviewAction(interviewData: any) {
   await connection();
   try {
@@ -57,13 +71,13 @@ export async function createInterviewAction(interviewData: any) {
     const { payload, error } = await verifyToken();
     if (error || !payload) return { success: false, code: error || "UNAUTHORIZED" };
 
-    //  ZOD VALIDATION 
+    // Zod Validation
     const result = interviewSchema.safeParse(interviewData);
     if (!result.success) {
-      return { success: false, code: "VALIDATION_ERROR", message: result.error.issues[0].message };
+      return { success: false, message: result.error.issues[0].message };
     }
 
-    //  FIELD MAPPING: jobId -> job | candidateId -> candidate
+    // A. Create Interview Record
     const interview = await Interview.create({
       job: result.data.jobId,
       candidate: result.data.candidateId,
@@ -76,36 +90,64 @@ export async function createInterviewAction(interviewData: any) {
       notes: result.data.notes,
     });
 
+    // B. Sync Application Status
+    await Application.findOneAndUpdate(
+      { job: result.data.jobId, candidate: result.data.candidateId },
+      { $set: { status: "shortlisted" } }
+    );
+
+    //  ASLI TRIGGER: Notify Candidate 
+    await createNotification({
+      recipient: result.data.candidateId,
+      sender: payload._id as string,
+      message: `Interview scheduled: ${result.data.startTime} on ${new Date(result.data.interviewDate).toLocaleDateString()}`,
+      link: "/candidate/schedule",
+      type: "success"
+    });
+
     revalidatePath("/hr/schedule");
     revalidatePath("/hr/dashboard");
+    revalidatePath("/hr/applications");
+    revalidatePath("/candidate/schedule");
 
-    return { success: true, interview: JSON.parse(JSON.stringify(interview)) };
+    return { success: true, message: "Interview scheduled & Candidate notified! 🎉" };
   } catch (error: any) {
     console.error("CREATE_INT_ERROR:", error.message);
     return { success: false, code: "SERVER_ERROR" };
   }
 }
 
-
-// 3. UPDATE INTERVIEW STATUS (Completed/Cancelled) 
-
+// 3. UPDATE STATUS (With Notification Trigger) 
 export async function updateInterviewStatusAction(interviewId: string, status: string) {
   await connection();
   try {
     await connectDB();
     const { payload, error } = await verifyToken();
-    if (error || !payload) return { success: false, code: error || "UNAUTHORIZED" };
+    if (error || !payload) return { success: false, code: error };
 
-    // Security: Only owner can update 🛡️
     const updated = await Interview.findOneAndUpdate(
       { _id: interviewId, interviewer: payload._id },
       { $set: { status } },
       { new: true }
-    );
+    ).populate("job");
 
     if (!updated) return { success: false, code: "NOT_FOUND" };
 
+    // 🚀 ASLI TRIGGER: Jab status 'cancelled' ho ✅
+    if (status === "cancelled") {
+      await createNotification({
+        recipient: updated.candidate.toString(),
+        sender: payload._id as string,
+        message: `Your interview for ${(updated.job as any).title} has been cancelled.`,
+        link: "/candidate/schedule",
+        type: "alert" // Red icon ke liye
+      });
+    }
+
     revalidatePath("/hr/schedule");
+    revalidatePath("/candidate/schedule");
+    revalidatePath("/", "layout");
+
     return { success: true };
   } catch (error: any) {
     return { success: false, code: "SERVER_ERROR" };
@@ -126,6 +168,7 @@ export async function deleteInterviewAction(interviewId: string) {
       _id: interviewId,
       interviewer: payload._id,
     });
+    
 
     if (!deleted) return { success: false, code: "NOT_FOUND" };
 

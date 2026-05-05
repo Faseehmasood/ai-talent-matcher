@@ -17,6 +17,7 @@ import { useTheme } from "@/components/theme-provider"
 import { CreateJobModal } from "../dashboard/CreateJobModal"
 import Link from "next/link"
 import { AddUserModal } from "../dashboard/AddUserModal"
+import { NotificationBell } from "@/components/layout/NotificationBell"
 
 export function Navbar() {
   const pathname = usePathname()
@@ -79,10 +80,7 @@ export function Navbar() {
             )}
         </div>
 
-        <Button variant="ghost" size="icon" className="relative rounded-full">
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
-        </Button>
+        <NotificationBell />
 
         {/* User Account Dropdown */}
         <DropdownMenu>

@@ -27,7 +27,7 @@ export default async function ArchivedCandidatesPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {candidates.length > 0 ? (
           candidates.map((candidate: any) => (
-            <Card key={candidate._id} className="rounded-3xl border-border bg-card opacity-80 grayscale-[50%] hover:grayscale-0 transition-all">
+            <Card key={candidate._id} className="rounded-3xl border-border bg-card opacity-80 grayscale-50 hover:grayscale-0 transition-all">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <Avatar className="w-12 h-12 border">
