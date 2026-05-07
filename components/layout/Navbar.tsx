@@ -1,11 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { logoutAction } from "@/src/actions/user.actions"
 import { Bell, Upload, Search, Settings, Sun, Moon, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar" //  AvatarImage add kiya
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -43,12 +42,12 @@ export function Navbar() {
     <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        <div className="relative w-72 hidden md:block">
+        {/* <div className="relative w-72 hidden md:block">
           <Input
             placeholder="Search resources..."
             className="pl-4 rounded-full bg-muted border-0 h-10 shadow-inner"
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="flex items-center gap-3">
@@ -64,14 +63,14 @@ export function Navbar() {
 
         {/* Role Based Buttons */}
         <div className="flex items-center gap-2">
-            {role === "hr" && (
+            {/* {role === "hr" && (
                 <div className="flex items-center gap-3">
                     <Button variant="outline" size="sm" className="gap-2 rounded-xl hidden lg:flex border-border shadow-sm">
                     <Upload className="w-4 h-4" /> Import
                     </Button>
                     <CreateJobModal />
                 </div>
-            )}
+            )} */}
             {role === "admin" && <AddUserModal />}
             {role === "candidate" && (
                 <Button asChild variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">

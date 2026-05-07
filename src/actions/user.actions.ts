@@ -7,6 +7,7 @@ import { jwtVerify } from "jose";
 import { revalidatePath } from "next/cache";
 import { updateProfileSchema, changePasswordSchema } from "@/src/lib/validations";
 import { uploadOnCloudinary } from "../utils/cloudinary";
+import connection from "@/src/lib/db";
 
 // Environment Variable Safety
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
@@ -52,9 +53,6 @@ export async function updateProfileAction(data: any) {
       { $set: result.data }, 
       { new: true } 
     ).select("-password");
-
-    console.log("UPDATED USER SKILLS:", updatedUser?.skills)
-    console.log("UPDATED USER:", updatedUser)
 
     if (!updatedUser) return { success: false, message: "User not found" };
 
@@ -184,6 +182,72 @@ export async function toggleUserStatusAction(userId: string) {
     };
   } catch (error: any) {
     console.error("TOGGLE_STATUS_ERROR:", error.message);
+    return { success: false, message: "Server Error" };
+  }
+}
+
+
+//Admin Users 
+
+// src/actions/user.actions.ts mein getAllUsersAction dhoondo aur update karo ✅
+
+export async function getAllUsersAction() {
+  await connection();
+  try {
+    await connectDB();
+    const { payload, error } = await verifyToken();
+    
+    if (error || !payload || payload.role !== "admin") {
+      return { success: false, code: "FORBIDDEN" };
+    }
+
+    // ASLI FIX: Query se 'isActive: true' nikaal do 
+    // Hum sirf ye check karenge ke Admin khud ko list mein na dekhay
+    const users = await User.find({ 
+        _id: { $ne: payload._id } 
+    })
+    .select("-password -refreshToken")
+    .sort({ createdAt: -1 })
+    .lean();
+
+    return {
+      success: true,
+      users: JSON.parse(JSON.stringify(users))
+    };
+  } catch (error: any) {
+    return { success: false, code: "SERVER_ERROR" };
+  }
+}
+
+
+// Admin update User 
+
+export async function adminUpdateUserAction(userId: string, data: { name: string, role: string }) {
+  await connection();
+  try {
+    await connectDB();
+    const { payload, error } = await verifyToken();
+    
+    // SECURITY: Sirf Admin doosron ka data badal sakta hai 🛡️
+    if (error || !payload || payload.role !== "admin") {
+      return { success: false, message: "Forbidden" };
+    }
+
+    // Database mein update karo ✅
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { name: data.name, role: data.role } },
+      { new: true }
+    );
+
+    if (!updatedUser) return { success: false, message: "User not found" };
+
+    // Dashboard refresh karo taake table update ho jaye
+    revalidatePath("/admin/users");
+    revalidatePath("/hr/candidates");
+
+    return { success: true, message: "User updated successfully! ✨" };
+  } catch (error: any) {
     return { success: false, message: "Server Error" };
   }
 }

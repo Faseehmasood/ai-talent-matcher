@@ -54,7 +54,7 @@ export async function getMyScheduleAction() {
     };
 
   } catch (error: any) {
-    console.error("GET_SCHEDULE_ERROR:", error.message); // ← FIX 1: Log add kiya
+    console.error("GET_SCHEDULE_ERROR:", error.message); 
     return { success: false, code: "SERVER_ERROR" };
   }
 }
@@ -104,9 +104,9 @@ export async function createInterviewAction(interviewData: any) {
     revalidatePath("/hr/dashboard");
     revalidatePath("/hr/applications");
     revalidatePath("/candidate/schedule");
-    revalidatePath("/candidate/dashboard"); // Candidate dashboard bhi refresh
+    revalidatePath("/candidate/dashboard");
 
-    return { success: true, message: "Interview scheduled & Candidate notified! 🎉" };
+    return { success: true, message: "Interview scheduled & Candidate notified!" };
 
   } catch (error: any) {
     console.error("CREATE_INT_ERROR:", error.message);
@@ -130,13 +130,13 @@ export async function updateInterviewStatusAction(interviewId: string, status: s
 
     if (!updated) return { success: false, code: "NOT_FOUND" };
 
-    // FIX 4: Har status ke liye dynamic message
+    // Har status ke liye dynamic message
     let notificationMessage = "";
     let notificationType: "info" | "success" | "warning" | "alert" = "info";
 
     if (status === "cancelled") {
       notificationMessage = `Your interview for ${(updated.job as any).title} has been cancelled. HR will contact you soon.`;
-      notificationType = "alert"; // ← Red notification
+      notificationType = "alert"; // Red notification
     } else if (status === "completed") {
       notificationMessage = `Your interview for ${(updated.job as any).title} is completed. Check back for updates!`;
       notificationType = "success";
@@ -181,7 +181,7 @@ export async function deleteInterviewAction(interviewId: string) {
 
     if (!deleted) return { success: false, code: "NOT_FOUND" };
 
-    // FIX 7: Delete par candidate notify karo
+    // Delete par candidate notify karo
     await createNotification({
       recipient: deleted.candidate.toString(),
       sender: payload._id as string,
@@ -192,13 +192,13 @@ export async function deleteInterviewAction(interviewId: string) {
 
     revalidatePath("/hr/schedule");
     revalidatePath("/hr/dashboard");
-    revalidatePath("/candidate/schedule");    //  FIX 
-    revalidatePath("/candidate/dashboard");  //  FIX 
+    revalidatePath("/candidate/schedule");    
+    revalidatePath("/candidate/dashboard");  
 
     return { success: true };
 
   } catch (error: any) {
-    console.error("DELETE_INT_ERROR:", error.message); // ← FIX 10: Log add kiya
+    console.error("DELETE_INT_ERROR:", error.message); 
     return { success: false, code: "SERVER_ERROR" };
   }
 }
