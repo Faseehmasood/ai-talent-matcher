@@ -251,3 +251,45 @@ export async function adminUpdateUserAction(userId: string, data: { name: string
     return { success: false, message: "Server Error" };
   }
 }
+
+
+export async function adminCreateUserAction(userData: any) {
+  await connection();
+  try {
+    await connectDB();
+    
+    //  Check karo ke request bhejne wala khud Admin hai? 
+    const { payload, error } = await verifyToken();
+    if (error || !payload || payload.role !== "admin") {
+      return { success: false, message: "Forbidden: Only Admins can create internal accounts!" };
+    }
+
+    // 2. VALIDATION: Check karo email pehle se toh nahi?
+    const { name, email, password, role } = userData;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return { success: false, message: "User with this email already exists!" };
+
+    // 3. CREATE: Naya user banao (Staff ya Partner) 
+    // Note: Password model middleware se khud hash hoga
+    const newUser = await User.create({
+      name,
+      email,
+      password, 
+      role,
+      isVerified: true, //  Admin ne banaya hai toh verification bypass!
+    });
+
+    //  Admin users table ko refresh karo
+    revalidatePath("/admin/users");
+
+    return { 
+      success: true, 
+      message: `${role.toUpperCase()} account created for ${name}! 🎊`,
+      user: JSON.parse(JSON.stringify(newUser))
+    };
+
+  } catch (error: any) {
+    console.error("ADMIN_CREATE_USER_ERROR:", error.message);
+    return { success: false, message: "Server encountered an error" };
+  }
+}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { adminCreateUserAction } from "@/src/actions/user.actions" 
 import {
   Dialog,
   DialogContent,
@@ -11,24 +11,54 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { UserPlus, ShieldCheck, Mail, Lock, UserCog } from "lucide-react"
+import { UserPlus, Mail, Lock, UserCog, Loader2, ShieldCheck } from "lucide-react"
 
 export function AddUserModal() {
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Form handle karne ka function (Abhi sirf console log kare ga)
-  const handleSubmit = (e: React.FormEvent) => {
+  // 1. FORM STATE: Initial values tayaar hain 
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "Staff123!", // Default temporary password
+    role: "hr"
+  })
+
+  //  ASLI SUBMIT HANDLER 
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Basic validation
+    if (!formData.name || !formData.email) {
+      return alert("Please fill in all required fields!")
+    }
+
     setLoading(true)
-    console.log("Creating new internal user...")
-    setTimeout(() => setLoading(false), 1500)
+    try {
+      // Backend API call 
+      const response = await adminCreateUserAction(formData)
+
+      if (response.success) {
+        alert(response.message)
+        setOpen(false) // Modal band karo
+        setFormData({ name: "", email: "", password: "Staff123!", role: "hr" }) // Form saaf karo 
+      } else {
+        alert("Error: " + response.message)
+      }
+    } catch (error) {
+      alert("Something went wrong on the server")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <Dialog>
-      {/* 1. Trigger Button - Jo Navbar mein nazar aaye ga */}
+    <Dialog open={open} onOpenChange={setOpen}>
+      {/* TRIGGER BUTTON (Jo Navbar ya Page par dikhta hai) */}
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="rounded-xl gap-2 border-border shadow-sm hover:bg-muted transition-all">
           <UserPlus className="w-4 h-4" /> 
@@ -36,58 +66,95 @@ export function AddUserModal() {
         </Button>
       </DialogTrigger>
 
-      {/* 2. Modal Content */}
-      <DialogContent className="sm:max-w-[450px] rounded-3xl border-border shadow-2xl">
-        <DialogHeader>
-          <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-2 text-primary">
-            <UserCog className="w-6 h-6" />
-          </div>
-          <DialogTitle className="text-2xl font-bold tracking-tight">Create Internal Account</DialogTitle>
-          <DialogDescription>
-            Add a staff member or trusted HR partner to the platform.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[450px] rounded-[2rem] border-border shadow-2xl bg-card">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-2 text-primary border border-primary/20">
+              <UserCog className="w-6 h-6" />
+            </div>
+            <DialogTitle className="text-2xl font-black tracking-tight">Create Internal Account</DialogTitle>
+            <DialogDescription className="text-xs font-medium">
+              Manually add a staff member or verified partner to the platform.
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="grid gap-5 py-4">
-          {/* Full Name */}
-          <div className="space-y-2">
-            <Label htmlFor="staff-name">Full Name</Label>
-            <Input id="staff-name" placeholder="e.g. Ali Ahmed" required className="rounded-xl h-11 border-border/60" />
-          </div>
+          <div className="grid gap-5 py-6">
+            {/* Full Name Field */}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <UserPlus className="w-3 h-3" /> Full Name
+              </Label>
+              <Input 
+                required
+                placeholder="e.g. Ali Ahmed"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="rounded-xl h-11 border-border/60 focus-visible:ring-primary/20" 
+              />
+            </div>
 
-          {/* Email Address */}
-          <div className="space-y-2">
-            <Label htmlFor="staff-email">Office Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input id="staff-email" type="email" placeholder="name@company.com" required className="pl-10 rounded-xl h-11 border-border/60" />
+            {/* Email Field */}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Mail className="w-3 h-3" /> Office Email
+              </Label>
+              <Input 
+                type="email"
+                required
+                placeholder="ali@talentsync.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="rounded-xl h-11 border-border/60 focus-visible:ring-primary/20" 
+              />
+            </div>
+
+            {/* Role Selection Field */}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <ShieldCheck className="w-3 h-3" /> System Role
+              </Label>
+              <select 
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none cursor-pointer"
+              >
+                <option value="hr">HR Manager (Recruiter)</option>
+                <option value="admin">Platform Admin (God Mode)</option>
+                <option value="candidate">Candidate (Manual Entry)</option>
+              </select>
+            </div>
+
+            {/* Temporary Password Field */}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Lock className="w-3 h-3" /> Temporary Password
+              </Label>
+              <Input 
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="rounded-xl h-11 font-mono border-border/60 focus-visible:ring-primary/20" 
+              />
+              <p className="text-[10px] text-muted-foreground italic px-1">*User should change this after first login.</p>
             </div>
           </div>
 
-          {/* Role Selection */}
-          <div className="space-y-2">
-            <Label>System Role</Label>
-            <select className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer">
-              <option value="hr">HR Manager (Recruitment)</option>
-              <option value="admin">Sub-Admin (Platform Control)</option>
-              <option value="candidate">Candidate (Manual Entry)</option>
-            </select>
-          </div>
-
-          {/* Temporary Password */}
-          <div className="space-y-2">
-            <Label htmlFor="staff-pass">Temporary Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input id="staff-pass" type="text" defaultValue="Pass@1234" required className="pl-10 rounded-xl h-11 font-mono border-border/60" />
-            </div>
-            <p className="text-[10px] text-muted-foreground italic px-1">*User can change this password after their first login.</p>
-          </div>
-
-          <DialogFooter className="pt-4 border-t border-border/50">
-            <Button variant="ghost" type="button" className="rounded-xl">Cancel</Button>
-            <Button type="submit" className="rounded-xl px-8 font-bold" disabled={loading}>
-              {loading ? "Processing..." : "Create Account"}
+          <DialogFooter className="border-t pt-6 border-border/50">
+            <Button variant="ghost" type="button" onClick={() => setOpen(false)} className="rounded-xl font-bold">
+               Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="rounded-xl px-10 font-black shadow-lg shadow-primary/20"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </DialogFooter>
         </form>

@@ -5,6 +5,7 @@ import { User } from "@/src/models/users.model";
 import { registerSchema } from "@/src/lib/validations";
 import { cookies } from "next/headers";
 import { loginSchema } from "@/src/lib/validations";
+import { createNotification } from "./notification.actions";
 
 // REGISTER 
 
@@ -40,6 +41,16 @@ export async function registerUserAction(formData: any) {
       phoneNumber,
       
     });
+
+    if(newUser.role === "hr"){
+      const admin=await User.findOne({role:"admin"});
+      await createNotification({        recipient: admin._id.toString(),
+      sender: newUser._id.toString(),
+      message: `New HR Registered: ${newUser.name} is waiting for review.`,
+      link: "/admin/users",
+      type: "info"
+    });
+    }
 
     // 5. Response bhejo (Password hata kar) 
     return {
@@ -116,7 +127,7 @@ export async function loginUserAction(formData: any) {
       path: "/",
     });
 
-    // 7. Response bhejo (Safe User Object) ✅
+    // 7. Response bhejo (Safe User Object) 
     return {
       success: true,
       message: "Login successful!",

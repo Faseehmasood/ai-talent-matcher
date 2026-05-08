@@ -22,7 +22,7 @@ export function Navbar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { user, logout } = useAuthStore() // Store se user aur logout dono liye
-  const router = useRouter()
+
 
   const handleLogout = async () => {
     const res = await logoutAction()

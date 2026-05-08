@@ -7,6 +7,17 @@ import { jwtVerify } from "jose"
 import { connection } from "next/server"
 import { revalidatePath } from "next/cache"
 import { createJobSchema, updateJobSchema } from "@/src/lib/validations" 
+import { User } from "@/src/models/users.model"
+
+interface AuthPayload {
+  _id: string;
+  email: string;
+  role: string;
+  name: string;
+}
+
+
+
 
 // Environment Variable Safety
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
@@ -24,7 +35,7 @@ async function verifyToken() {
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
-    return { payload, error: null }
+     return { payload: payload as unknown as AuthPayload, error: null };
   } catch {
     return { payload: null, error: "TOKEN_EXPIRED" }
   }
@@ -97,6 +108,18 @@ export async function createJobAction(jobData: any) {
       postedBy: payload._id,
       status: "active"
     })
+
+    const admin = await User.findOne({ role: "admin" });
+
+if (admin) {
+  await createNotification({
+    recipient: admin._id.toString(),
+    sender: payload._id.toString(), 
+    message: `New Job Posted: "${newJob.title}" by ${payload.name}`,
+    link: "/admin/jobs",
+    type: "info"
+  });
+}
 
     revalidatePath("/hr/jobs")
     revalidatePath("/hr/dashboard")

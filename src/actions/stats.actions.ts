@@ -1,4 +1,5 @@
 "use server";
+
 import connectDB from "@/src/lib/db";
 import { Job } from "@/src/models/job.model";
 import { Application } from "@/src/models/application.model";
@@ -6,128 +7,167 @@ import { Interview } from "@/src/models/interview.model";
 import { User } from "@/src/models/users.model";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import { unstable_noStore as noStore} from "next/cache"
+import { connection } from "next/server";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
-const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+//  Environment Safety Check 
+const secretKey = process.env.ACCESS_TOKEN_SECRET;
+if (!secretKey) {
+  throw new Error("ACCESS_TOKEN_SECRET is not defined in .env file!");
+}
+const JWT_SECRET = new TextEncoder().encode(secretKey);
 
-export async function getDashboardStatsAction() {
-  noStore();
+//  PRIVATE HELPER: Token Verification
+
+async function verifyToken() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+  
+  if (!token) return { payload: null, error: "UNAUTHORIZED" };
 
   try {
-    await connectDB();
-    const cookieStore = await cookies();
-    const token = cookieStore.get("accessToken")?.value;
-    if (!token) return { success: false, code: "UNAUTHORIZED" };
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return { payload, error: null };
+  } catch {
+    return { payload: null, error: "TOKEN_EXPIRED" };
+  }
+}
 
-    let payload: any;
-    try {
-      const verified = await jwtVerify(token, JWT_SECRET);
-      payload = verified.payload;
-    } catch {
-      return { success: false, code: "TOKEN_EXPIRED" };
-    }
+// 1. GET DASHBOARD STATS (Universal - HR/Admin/Candidate)  
+
+export async function getDashboardStatsAction() {
+  await connection();
+  try {
+    await connectDB();
+    const { payload, error } = await verifyToken();
+
+    if (error || !payload) return { success: false, code: error || "UNAUTHORIZED" };
 
     const userId = payload._id as string;
     const role = payload.role as string;
 
-    
-    // 1. HR STATS 
-    
+    // --- Admin Logic ---
+    if (role === "admin") {
+      const [totalUsers, totalJobs, totalApplications] = await Promise.all([
+        User.countDocuments(),
+        Job.countDocuments(),
+        Application.countDocuments()
+      ]);
+      return { success: true, stats: { totalUsers, totalJobs, totalApplications } };
+    }
+
+    // --- HR Logic ---
     if (role === "hr") {
-      // Step 1: Teen cheezein ek saath fetch karo
-      const [totalJobs, totalInterviews, jobIds] = await Promise.all([
+      const [totalJobs, totalInterviews, myJobIds] = await Promise.all([
         Job.countDocuments({ postedBy: userId }),
         Interview.countDocuments({ interviewer: userId }),
-        Job.find({ postedBy: userId }).distinct("_id"),
+        Job.find({ postedBy: userId }).distinct("_id")
       ]);
 
       let totalApplications = 0;
-      let chartData: { month: string; applicants: number }[] = [];
-      let recentApplications: any[] = [];
+      let monthlyApps: any[] = [];
+      let recentApps: any[] = [];
 
-      if (totalJobs > 0) {
-        // Step 2: Teen cheezein ek saath fetch karo
-        const [appCount, monthlyData, recentAppsData] = await Promise.all([
-          // Applications ki total ginti
-          Application.countDocuments({ job: { $in: jobIds } }),
-
-          // Chart ke liye monthly data
+      if (myJobIds.length > 0) {
+        const [appCount, aggregation, recentData] = await Promise.all([
+          Application.countDocuments({ job: { $in: myJobIds } }),
           Application.aggregate([
-            { $match: { job: { $in: jobIds } } },
+            { $match: { job: { $in: myJobIds } } },
             { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
-            { $sort: { _id: 1 } },
+            { $sort: { "_id": 1 } }
           ]),
-
-          // Recent 5 applications
-          Application.find({ job: { $in: jobIds } })
-            .populate("candidate", "name email avatar phoneNumber") 
-            .populate("job", "title")                   
-            .sort({ createdAt: -1 })                    
-            .limit(5)                                   
-            .lean(),                                    // Fast plain object
+          Application.find({ job: { $in: myJobIds } })
+            .populate("candidate", "name email avatar phoneNumber")
+            .populate("job", "title")
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .lean()
         ]);
-
         totalApplications = appCount;
-
-        chartData = monthlyData.map((item) => ({
-          month: monthNames[item._id - 1],
-          applicants: item.count,
-        }));
-
-        recentApplications = JSON.parse(JSON.stringify(recentAppsData));
+        monthlyApps = aggregation;
+        recentApps = recentData;
       }
+
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const chartData = monthlyApps.map(item => ({
+        month: monthNames[item._id - 1],
+        applicants: item.count
+      }));
 
       return {
         success: true,
         stats: { totalJobs, totalApplications, totalInterviews },
         chartData,
-        recentApplications,
+        recentApplications: JSON.parse(JSON.stringify(recentApps))
       };
     }
 
-
-    // 2. ADMIN STATS 
-    
-    if (role === "admin") {
-      const [totalUsers, totalJobs, totalApplications] = await Promise.all([
-        User.countDocuments(),
-        Job.countDocuments(),
-        Application.countDocuments(),
-      ]);
-
-      return {
-        success: true,
-        stats: { totalUsers, totalJobs, totalApplications },
-        chartData: [],
-        recentApplications: [],
-      };
-    }
-
-
-    // 3. CANDIDATE STATS 
-    
+    // --- Candidate Logic ---
     if (role === "candidate") {
-      const [totalApplied, shortlisted, interviews, pending, rejected] = await Promise.all([
+      const [totalApplied, shortlisted, pending, rejected] = await Promise.all([
         Application.countDocuments({ candidate: userId }),
         Application.countDocuments({ candidate: userId, status: "shortlisted" }),
-        Interview.countDocuments({ candidate: userId }),
         Application.countDocuments({ candidate: userId, status: "pending" }),
         Application.countDocuments({ candidate: userId, status: "rejected" }),
       ]);
-
-      return {
-        success: true,
-        stats: { totalApplied, shortlisted, interviews, pending, rejected },
-        chartData: [],
-        recentApplications: [],
-      };
+      return { success: true, stats: { totalApplied, shortlisted, pending, rejected } };
     }
 
     return { success: false, code: "INVALID_ROLE" };
 
   } catch (error: any) {
     console.error("STATS_FETCH_ERROR:", error.message);
+    return { success: false, code: "SERVER_ERROR" };
+  }
+}
+
+// 2. GET ADMIN ANALYTICS (Deep Platform Insights)  
+
+export async function getAdminAnalyticsAction() {
+  await connection();
+  try {
+    await connectDB();
+    const { payload, error } = await verifyToken();
+
+    if (error || !payload || payload.role !== "admin") {
+      return { success: false, code: "FORBIDDEN" };
+    }
+
+    //  Parallel Aggregation: Growth + Distribution
+    const [userGrowth, jobGrowth, userDistribution] = await Promise.all([
+      User.aggregate([
+        { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
+        { $sort: { "_id": 1 } }
+      ]),
+      Job.aggregate([
+        { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
+        { $sort: { "_id": 1 } }
+      ]),
+      User.aggregate([
+        { $group: { _id: "$role", count: { $sum: 1 } } }
+      ])
+    ]);
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // Formatting monthly data (filling gaps with 0)
+    const growthData = monthNames.map((name, index) => {
+      const u = userGrowth.find(item => item._id === index + 1);
+      const j = jobGrowth.find(item => item._id === index + 1);
+      return {
+        month: name,
+        users: u ? u.count : 0,
+        jobs: j ? j.count : 0
+      };
+    });
+
+    return {
+      success: true,
+      growthData,
+      distributionData: userDistribution.map(item => ({ name: item._id, value: item.count }))
+    };
+
+  } catch (error: any) {
+    console.error("ADMIN_ANALYTICS_ERROR:", error.message);
     return { success: false, code: "SERVER_ERROR" };
   }
 }
