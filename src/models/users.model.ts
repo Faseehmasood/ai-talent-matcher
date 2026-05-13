@@ -9,6 +9,8 @@ export interface IUser extends Document {
   role: "admin" | "hr" | "candidate"
   avatar?: string
   refreshToken?: string // ← Naya add kiya
+  isGoogleUser?: boolean
+needsRoleSelection?: boolean
   isActive: boolean
   bio?: string
   phoneNumber?: string
@@ -51,6 +53,15 @@ const userSchema = new Schema<IUser>(
     refreshToken: {
       type: String, 
     },
+
+    isGoogleUser: {
+  type: Boolean,
+  default: false,
+},
+needsRoleSelection: {
+  type: Boolean,
+  default: false,
+},
     isActive: {
       type: Boolean,
       default: true,
