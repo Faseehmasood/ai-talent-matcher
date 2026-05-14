@@ -8,6 +8,7 @@ interface User {
   email: string;
   role: "admin" | "hr" | "candidate";
   avatar?: string;
+  isGoogleUser?: boolean;
 }
 
 

@@ -189,7 +189,7 @@ export async function toggleUserStatusAction(userId: string) {
 
 //Admin Users 
 
-// src/actions/user.actions.ts mein getAllUsersAction dhoondo aur update karo ✅
+// src/actions/user.actions.ts mein getAllUsersAction dhoondo aur update karo
 
 export async function getAllUsersAction() {
   await connection();
