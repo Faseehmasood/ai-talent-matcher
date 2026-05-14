@@ -8,6 +8,8 @@ import { connection } from "next/server"
 import { revalidatePath } from "next/cache"
 import { createJobSchema, updateJobSchema } from "@/src/lib/validations" 
 import { User } from "@/src/models/users.model"
+import { createNotification } from "@/src/actions/notification.actions";
+import {  CreateJobInput, UpdateJobInput } from "@/src/lib/validations"
 
 interface AuthPayload {
   _id: string;
@@ -91,7 +93,7 @@ export async function deleteJobAction(jobId: string) {
 
 // 3. CREATE JOB ACTION
 
-export async function createJobAction(jobData: any) {
+export async function createJobAction(jobData: CreateJobInput) {
   await connection()
   try {
     await connectDB()
@@ -132,7 +134,7 @@ if (admin) {
 
 // 4. UPDATE JOB ACTION
 
-export async function updateJobAction(jobId: string, updates: any) {
+export async function updateJobAction(jobId: string, updates: UpdateJobInput) {
   await connection()
   try {
     await connectDB()
@@ -220,7 +222,7 @@ export async function getAllPlatformJobsAction() {
 
 
 // DELETE JOB ACTION (Admin)
-import { createNotification } from "@/src/actions/notification.actions";
+
 
 export async function adminDeleteJobAction(jobId: string, reason: string) {
   await connection();

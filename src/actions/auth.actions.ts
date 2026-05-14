@@ -6,10 +6,11 @@ import { registerSchema } from "@/src/lib/validations";
 import { cookies } from "next/headers";
 import { loginSchema } from "@/src/lib/validations";
 import { createNotification } from "./notification.actions";
+import { RegisterInput, LoginInput} from "@/src/lib/validations"
 
 // REGISTER 
 
-export async function registerUserAction(formData: any) {
+export async function registerUserAction(formData: RegisterInput) {
   try {
     // 1. Database se rabta karo
     await connectDB();
@@ -76,7 +77,7 @@ export async function registerUserAction(formData: any) {
 
 // Login Portion
 
-export async function loginUserAction(formData: any) {
+export async function loginUserAction(formData: LoginInput) {
   try {
     await connectDB();
 

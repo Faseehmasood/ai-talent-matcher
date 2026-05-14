@@ -197,7 +197,7 @@ export const logout = asyncHandler(async (req: NextRequest) => {
     req.headers.get("authorization")?.replace("Bearer ", "")
 
   if (token) {
-    // DB se refresh token delete karo
+  try {
     const decoded = jwt.verify(
       token,
       process.env.ACCESS_TOKEN_SECRET as string
@@ -206,7 +206,13 @@ export const logout = asyncHandler(async (req: NextRequest) => {
     await User.findByIdAndUpdate(decoded._id, {
       $unset: { refreshToken: 1 },
     })
+  } catch (error) {
+    // Token invalid/expired — koi baat nahi
+    // Cookies neeche waise bhi delete ho jayengi
+    console.log("Logout - token invalid, skipping DB cleanup")
   }
+}
+
 
   // Cookies delete karo
   const response = NextResponse.json(
