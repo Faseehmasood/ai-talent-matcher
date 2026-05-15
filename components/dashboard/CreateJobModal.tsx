@@ -35,7 +35,7 @@ export function CreateJobModal() {
       title: formData.title,
       company: formData.company,
       location: formData.location,
-      jobType: formData.jobType,
+      jobType: formData.jobType as "full-time" | "part-time" | "remote" | "hybrid",
       description: formData.description,
       salary: {
         min: Number(formData.minSalary),
