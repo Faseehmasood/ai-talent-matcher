@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
-import { getChartStats } from "@/src/controllers/stats.controller"
+import { getDashboardStatsAction } from "@/src/controllers/stats.controller"
 
 export async function GET(req: NextRequest) {
-  return getChartStats(req)
+  return Response.json(await getDashboardStatsAction())
 }
