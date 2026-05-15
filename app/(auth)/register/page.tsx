@@ -28,7 +28,10 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const response = await registerUserAction(formData)
+      const response = await registerUserAction({
+        ...formData,
+        role: formData.role as "admin" | "hr" | "candidate"
+      })
       if (response.success) {
         alert("Account created successfully! 🎉")
         router.push("/login") 
