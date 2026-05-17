@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { UserCog, ShieldAlert, Loader2, CheckCircle2, Ban, User, ShieldCheck } from "lucide-react"
-// 🛠️ Dono Actions import kiye ✅
 import { toggleUserStatusAction, adminUpdateUserAction } from "@/src/actions/user.actions"
 
 export function UserEditModal({ user }: { user: any }) {
@@ -14,13 +13,13 @@ export function UserEditModal({ user }: { user: any }) {
   const [loading, setLoading] = useState(false)
   const [toggleLoading, setToggleLoading] = useState(false)
 
-  // 1. FORM STATE: Database se aaya hua data pehle se bhara hua ✅
+  // 1. FORM STATE: Database se aaya hua data pehle se bhara hua 
   const [formData, setFormData] = useState({
     name: user.name || "",
     role: user.role || "candidate"
   })
 
-  // 🚀 HANDLER 1: Save Profile & Role Changes ✅
+  // HANDLER 1: Save Profile & Role Changes 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -39,7 +38,7 @@ export function UserEditModal({ user }: { user: any }) {
     }
   }
 
-  // 🚀 HANDLER 2: Suspend / Activate Logic ✅
+  // HANDLER 2: Suspend / Activate Logic 
   const handleToggleStatus = async () => {
     setToggleLoading(true)
     try {
@@ -58,7 +57,7 @@ export function UserEditModal({ user }: { user: any }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* 🛠️ TRIGGER: Styled as a menu item ✅ */}
+      {/* TRIGGER: Styled as a menu item  */}
       <DialogTrigger asChild>
         <button className="w-full text-left px-2 py-2 text-sm hover:bg-muted rounded-md transition-all outline-none flex items-center gap-2 font-medium">
           <UserCog className="w-4 h-4 text-muted-foreground" />
@@ -79,7 +78,7 @@ export function UserEditModal({ user }: { user: any }) {
           </DialogHeader>
 
           <div className="grid gap-5 py-6">
-            {/* 🛠️ NAME CHANGE FIELD ✅ */}
+            {/* NAME CHANGE FIELD  */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <User className="w-3 h-3" /> Full Name
@@ -92,7 +91,7 @@ export function UserEditModal({ user }: { user: any }) {
               />
             </div>
             
-            {/* 🛠️ ROLE CHANGE DROPDOWN ✅ */}
+            {/* ROLE CHANGE DROPDOWN  */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <UserCog className="w-3 h-3" /> System Role
@@ -108,7 +107,7 @@ export function UserEditModal({ user }: { user: any }) {
               </select>
             </div>
 
-            {/* 🛠️ ACCOUNT STATUS TOGGLE ✅ */}
+            {/* ACCOUNT STATUS TOGGLE  */}
             <div className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${user.isActive ? 'bg-green-50/30 border-green-100' : 'bg-red-50/30 border-red-100'}`}>
                <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${user.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>

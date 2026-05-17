@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { applyForJobAction } from "@/src/actions/application.actions" // Asli Action
+import { applyForJobAction } from "@/src/actions/application.actions"
 import {
   Dialog,
   DialogContent,

@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Eye, FileText, Mail, Phone, Calendar, Download, UserCheck, UserX, Loader2 } from "lucide-react"
+import { Eye, FileText, Mail, Calendar, Download, UserCheck, UserX, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { updateApplicationStatusAction } from "@/src/actions/application.actions"
 

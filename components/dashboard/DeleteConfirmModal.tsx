@@ -12,16 +12,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { Trash2, AlertTriangle } from "lucide-react"
 
-// 🛠️ INTERFACE: Ab yeh kisi aik cheez ke liye fix nahi hai ✅
+// INTERFACE: Ab yeh kisi aik cheez ke liye fix nahi hai 
 interface DeleteConfirmProps {
   itemName: string;     // Jo cheez delete ho rahi hai uska naam
-  onDelete: () => void; // Parent se aane wala asli Delete function ✅
+  onDelete: () => void; // Parent se aane wala asli Delete function
 }
 
 export function DeleteConfirmModal({ itemName, onDelete }: DeleteConfirmProps) {
   return (
     <Dialog>
-      {/* 1. TRIGGER: Red Trash Icon ✅ */}
+      {/* 1. TRIGGER: Red Trash Icon   */}
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50 transition-all">
           <Trash2 className="w-4 h-4" />
@@ -57,11 +57,11 @@ export function DeleteConfirmModal({ itemName, onDelete }: DeleteConfirmProps) {
             No, Cancel
           </Button>
 
-          {/* 🛠️ ASLI ACTION BUTTON ✅ */}
+          {/* ASLI ACTION BUTTON */}
           <Button 
             variant="destructive" 
             className="rounded-xl h-11 font-bold shadow-lg shadow-red-500/20"
-            onClick={onDelete} // Parent ka function yahan chalay ga 🚀
+            onClick={onDelete} // Parent ka function yahan chalay ga 
           >
             Yes, Delete
           </Button>

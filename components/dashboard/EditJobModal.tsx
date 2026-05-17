@@ -1,12 +1,11 @@
 "use client"
 import { useState } from "react"
-import { updateJobAction } from "@/src/actions/job.actions" //  Action import kiya
+import { updateJobAction } from "@/src/actions/job.actions" 
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Edit3, Loader2 } from "lucide-react"
+import { Edit3 } from "lucide-react"
 
 export function EditJobModal({ job }: { job: any }) {
   const [open, setOpen] = useState(false)
