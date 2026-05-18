@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Search, MapPin, Briefcase, ArrowRight, Sparkles } from "lucide-react"
+import { MapPin, Briefcase, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { IntroAnimation } from "@/components/ui/IntroAnimation"
@@ -57,13 +56,13 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
               <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                 TalentaSync connects top companies with world-class talent through a seamless, automated, and beautiful experience.
               </p>
-              <div className="max-w-2xl mx-auto relative group">
+              {/* <div className="max-w-2xl mx-auto relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   placeholder="Search roles like 'React Developer'..."
                   className="h-16 pl-12 rounded-[1.5rem] border-border bg-card shadow-2xl text-md focus-visible:ring-1 focus-visible:ring-primary/20 transition-all"
                 />
-              </div>
+              </div> */}
             </div>
           </section>
 
@@ -72,7 +71,6 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
             <div className="flex items-center justify-between mb-10">
               <div className="space-y-1">
                 <h2 className="text-3xl font-bold tracking-tight">Recent Opportunities</h2>
-                <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">Global Listings</p>
               </div>
               <Button asChild variant="link" className="font-bold text-primary gap-2">
                 <Link href="/login">View All Jobs <ArrowRight className="w-4 h-4" /></Link>
