@@ -14,9 +14,9 @@ Secure Authentication: Seamless Google Login integration using NextAuth.js.
 
 Payment Integration: Stripe support for featured job listings and premium recruiter tools.
 
-🛠️ Tech Stack
+Tech Stack
 
-Framework: Next.js 15 (App Router)
+Framework: Next.js 16 (App Router)
 
 Language: TypeScript (for type safety and robust code)
 
@@ -26,7 +26,7 @@ Styling: Tailwind CSS & Shadcn UI
 
 Validation: Zod (for bulletproof API request validation)
 
-📂 Project Architecture
+Project Architecture
 
 The project follows a clean MVC (Model-View-Controller) pattern within the src directory to ensure scalability:
 

@@ -8,18 +8,17 @@ import connectDB from "../lib/db"
 import { createJobSchema, updateJobSchema } from "../lib/validations"
 
 
-// CREATE JOB — Sirf HR
 
 export const createJob = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  // Auth check — Sirf HR
+  
   const user = await verifyJWT(req)
   if (user.role !== "hr" && user.role !== "admin") {
     throw new ApiError(403, "Only HR can create jobs!")
   }
 
-  // Yeh lagao ✅
+  
 const body = await req.json()
 
 const result = createJobSchema.safeParse(body)
@@ -39,12 +38,12 @@ const job = await Job.create({
 })
 
 
-// GET ALL JOBS — Public
+
 
 export const getAllJobs = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  // URL se query params lo
+  
   const { searchParams } = new URL(req.url)
   const page = parseInt(searchParams.get("page") || "1")
   const limit = parseInt(searchParams.get("limit") || "10")
@@ -52,15 +51,15 @@ export const getAllJobs = asyncHandler(async (req: NextRequest) => {
   const jobType = searchParams.get("jobType") || ""
   const location = searchParams.get("location") || ""
 
-  // Skip calculate karo — Pagination ke liye
+  
   const skip = (page - 1) * limit
 
-  // Filter banao
+  
   const filter: Record<string, unknown> = {
-    status: "active", // Sirf active jobs
+    status: "active", 
   }
 
-  // Search — Title ya Company mein
+  
   if (search) {
     filter.$or = [
       { title: { $regex: search, $options: "i" } },
@@ -68,24 +67,24 @@ export const getAllJobs = asyncHandler(async (req: NextRequest) => {
     ]
   }
 
-  // Job Type filter
+ 
   if (jobType) {
     filter.jobType = jobType
   }
 
-  // Location filter
+ 
   if (location) {
     filter.location = { $regex: location, $options: "i" }
   }
 
-  // Jobs lo with pagination
+// Pagination to show limited jobs on page
   const jobs = await Job.find(filter)
-    .populate("postedBy", "name email") // HR ki info
-    .sort({ createdAt: -1 }) // Naye pehle
+    .populate("postedBy", "name email") 
+    .sort({ createdAt: -1 }) 
     .skip(skip)
     .limit(limit)
 
-  // Total count
+
   const total = await Job.countDocuments(filter)
 
   return NextResponse.json(
@@ -107,7 +106,6 @@ export const getAllJobs = asyncHandler(async (req: NextRequest) => {
 })
 
 
-// GET SINGLE JOB — Public
 
 export const getJobById = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
@@ -131,19 +129,17 @@ export const getJobById = asyncHandler(async (req: NextRequest, context?: { para
 })
 
 
-// UPDATE JOB — Sirf HR
+
 
 export const updateJob = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
-
-  // Auth check
   const user = await verifyJWT(req)
   if (user.role !== "hr" && user.role !== "admin") {
     throw new ApiError(403, "Only HR can update jobs!")
   }
 
   const jobId = context?.params?.id
-  // Yeh lagao ✅
+  
 const body = await req.json()
 
 const result = updateJobSchema.safeParse(body)
@@ -151,16 +147,16 @@ if (!result.success) {
   throw new ApiError(400, result.error.issues[0].message)
 }
 
-// Update line mein:
+
 { $set: result.data }
 
-  // Job dhundo
+ 
   const job = await Job.findById(jobId)
   if (!job) {
     throw new ApiError(404, "Job not found!")
   }
 
-  // Sirf apni job update kar sake HR
+
   if (
     user.role === "hr" &&
     job.postedBy.toString() !== user._id.toString()
@@ -168,11 +164,11 @@ if (!result.success) {
     throw new ApiError(403, "You can only update your own jobs!")
   }
 
-  // Update karo
+  
   const updatedJob = await Job.findByIdAndUpdate(
     jobId,
     { $set: result.data },
-    { returnDocument: "after" } // Updated document return karo
+    { returnDocument: "after" } 
   )
 
   return NextResponse.json(
@@ -182,12 +178,12 @@ if (!result.success) {
 })
 
 
-// DELETE JOB — Sirf HR/Admin
+
 
 export const deleteJob = asyncHandler(async (req: NextRequest, context?: { params: Record<string, string> }) => {
   await connectDB()
 
-  // Auth check
+  
   const user = await verifyJWT(req)
   if (user.role !== "hr" && user.role !== "admin") {
     throw new ApiError(403, "Only HR can delete jobs!")
@@ -195,13 +191,12 @@ export const deleteJob = asyncHandler(async (req: NextRequest, context?: { param
 
   const jobId = context?.params?.id
 
-  // Job dhundo
+
   const job = await Job.findById(jobId)
   if (!job) {
     throw new ApiError(404, "Job not found!")
   }
 
-  // Sirf apni job delete kar sake HR
   if (
     user.role === "hr" &&
     job.postedBy.toString() !== user._id.toString()
@@ -218,12 +213,11 @@ export const deleteJob = asyncHandler(async (req: NextRequest, context?: { param
 })
 
 
-// GET HR JOBS — Sirf HR apni jobs dekhe
 
 export const getMyJobs = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  // Auth check
+  
   const user = await verifyJWT(req)
   if (user.role !== "hr" && user.role !== "admin") {
     throw new ApiError(403, "Only HR can access this!")

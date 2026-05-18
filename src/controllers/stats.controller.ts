@@ -31,9 +31,6 @@ export async function getDashboardStatsAction() {
     const userId = payload._id as string;
     const role = payload.role as string;
 
-    // ==========================================
-    // 1. HR STATS
-    // ==========================================
     if (role === "hr") {
       const [totalJobs, totalInterviews, jobIds] = await Promise.all([
         Job.countDocuments({ postedBy: userId }),
@@ -48,18 +45,16 @@ export async function getDashboardStatsAction() {
       if (totalJobs > 0) {
         const [appCount, monthlyData, recentAppsData] = await Promise.all([
           
-          // Total applications count
+          
           Application.countDocuments({ job: { $in: jobIds } }),
 
-          // Chart ke liye monthly data
+          
           Application.aggregate([
             { $match: { job: { $in: jobIds } } },
             { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
             { $sort: { _id: 1 } },
           ]),
 
-          //  FIX 1: .select() add kiya taake resume field aaye
-          //  FIX 2: phoneNumber populate mein add kiya
           Application.find({ job: { $in: jobIds } })
             .select("resume coverLetter status createdAt candidate job")
             .populate("candidate", "name email phoneNumber avatar")
@@ -87,9 +82,7 @@ export async function getDashboardStatsAction() {
       };
     }
 
-    // ==========================================
-    // 2. ADMIN STATS
-    // ==========================================
+   
     if (role === "admin") {
       const [totalUsers, totalJobs, totalApplications] = await Promise.all([
         User.countDocuments(),
@@ -105,9 +98,7 @@ export async function getDashboardStatsAction() {
       };
     }
 
-    // ==========================================
-    // 3. CANDIDATE STATS
-    // ==========================================
+   
     if (role === "candidate") {
       const [totalApplied, shortlisted, interviews, pending, rejected] = await Promise.all([
         Application.countDocuments({ candidate: userId }),

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import connectDB from "@/src/lib/db"
 import { User } from "@/src/models/users.model"
-import { Notification } from "@/src/models/notification.model"
 import { SignJWT } from "jose"
 
 const ACCESS_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET)

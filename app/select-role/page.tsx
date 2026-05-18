@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion" // ✅ Animations
+import { motion, AnimatePresence } from "framer-motion"
 import { Briefcase, User, Loader2, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 export default function SelectRolePage() {
   const [selectedRole, setSelectedRole] = useState<"candidate" | "hr" | null>(null)
@@ -41,21 +40,20 @@ export default function SelectRolePage() {
     } catch (error) {
       console.error(error)
     } finally {
-      // Note: Agar redirect ho raha hai toh loading true hi rahay gi transition tak
-      // setLoading(false) 
+     
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      {/* 1. MAIN WRAPPER: Smooth Scale-in Animation */}
+    
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-lg p-10 bg-card border border-border shadow-2xl rounded-[3rem] text-center space-y-10"
       >
-        {/* Header */}
+
         <div className="space-y-3">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-primary/20 text-primary bg-primary/5 text-[10px] font-black uppercase tracking-widest mb-2">
              <Sparkles className="w-3 h-3 mr-2 fill-primary" /> One last step
@@ -68,9 +66,8 @@ export default function SelectRolePage() {
           </p>
         </div>
 
-        {/* Role Cards Grid */}
         <div className="grid grid-cols-2 gap-5">
-          {/* Candidate Card */}
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -92,7 +89,7 @@ export default function SelectRolePage() {
             </div>
           </motion.button>
 
-          {/* HR Card */}
+          
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -115,15 +112,15 @@ export default function SelectRolePage() {
           </motion.button>
         </div>
 
-        {/* 🪄 ASLI MORPHING BUTTON ✅ */}
+
         <div className="flex justify-center h-16">
           <motion.button
-            layout // 🛠️ Yeh magic prop hai jo width aur radius ko morph karta hai
+            layout 
             onClick={handleRoleSelect}
             disabled={!selectedRole || loading}
             animate={{
-              width: loading ? "64px" : "100%", // Chota ho kar circle banay ga
-              borderRadius: loading ? "100px" : "24px", // Radius barh jaye ga
+              width: loading ? "64px" : "100%",
+              borderRadius: loading ? "100px" : "24px",
             }}
             transition={{ 
               type: "spring", 

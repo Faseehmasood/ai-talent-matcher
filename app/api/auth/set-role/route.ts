@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "User not found" }, { status: 404 })
     }
 
-    // HR ne register kiya — admin ko notification bhejo
+    
     if (role === "hr") {
       try {
         const admin = await User.findOne({ role: "admin" })
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     user.refreshToken = newRefreshToken
     await user.save({ validateBeforeSave: false })
 
-    // Zustand store update karo role ke saath
+  
     const userDataForStore = {
       _id: user._id.toString(),
       name: user.name,

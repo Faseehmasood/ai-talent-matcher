@@ -7,7 +7,7 @@ import { verifyJWT } from "../middleware/auth"
 import { interviewSchema } from "../lib/validations"
 import connectDB from "../lib/db"
 
-// 1. Schedule a new interview (HR only)
+
 export const scheduleInterview = asyncHandler(async (req: NextRequest) => {
   await connectDB()
   const user = await verifyJWT(req)
@@ -24,8 +24,8 @@ export const scheduleInterview = asyncHandler(async (req: NextRequest) => {
   }
 
   const interview = await Interview.create({
-    job: result.data.jobId,           // mapping jobId -> job
-    candidate: result.data.candidateId, // mapping candidateId -> candidate
+    job: result.data.jobId,           
+    candidate: result.data.candidateId, 
     interviewer: user._id,
     interviewDate: result.data.interviewDate,
     startTime: result.data.startTime,
@@ -42,7 +42,7 @@ export const scheduleInterview = asyncHandler(async (req: NextRequest) => {
   return NextResponse.json(new ApiResponse(201, interview, "Interview scheduled!"), { status: 201 })
 })
 
-// 2. Get My Schedule (For HR Dashboard)
+
 export const getMySchedule = asyncHandler(async (req: NextRequest) => {
   await connectDB()
   const user = await verifyJWT(req)
@@ -50,12 +50,11 @@ export const getMySchedule = asyncHandler(async (req: NextRequest) => {
   const interviews = await Interview.find({ interviewer: user._id })
     .populate("candidate", "name email avatar")
     .populate("job", "title")
-    .sort({ interviewDate: 1, startTime: 1 }) // Date wise arrange ho jaye ga
+    .sort({ interviewDate: 1, startTime: 1 }) 
 
   return NextResponse.json(new ApiResponse(200, interviews, "Schedule fetched!"))
 })
 
-// 3. Get Candidate's Schedule (For Candidate Dashboard)
 export const getCandidateSchedule = asyncHandler(async (req: NextRequest) => {
   await connectDB()
   const user = await verifyJWT(req)
@@ -68,12 +67,9 @@ export const getCandidateSchedule = asyncHandler(async (req: NextRequest) => {
   return NextResponse.json(new ApiResponse(200, interviews, "Your schedule fetched!"))
 })
 
-// 4. Update Interview Status (HR or Candidate)
 export const updateInterviewStatus = asyncHandler(async (req: NextRequest, context?: { params: any }) => {
   await connectDB()
   const user = await verifyJWT(req)
-
-  // 🛠️ FIX: ID body se nahi, URL (context) se lo
   const interviewId = context?.params?.id;
 
   const body = await req.json();
@@ -84,11 +80,11 @@ export const updateInterviewStatus = asyncHandler(async (req: NextRequest, conte
     throw new ApiError(400, "Invalid status value!")
   }
 
-  // Ab interview sahi dhoonde ga
+
   const interview = await Interview.findById(interviewId)
   if (!interview) throw new ApiError(404, "Interview not found!")
 
-  // Validation: Sirf interviewer ya candidate khud update kar sakta hai
+
   if (interview.interviewer.toString() !== user._id.toString() && 
       interview.candidate.toString() !== user._id.toString()) {
     throw new ApiError(403, "Unauthorized to update this interview!")

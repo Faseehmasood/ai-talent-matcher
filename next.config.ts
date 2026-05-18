@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Saari API routes pe apply hoga
+      
         source: "/api/:path*",
         headers: [
           {

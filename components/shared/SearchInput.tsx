@@ -9,11 +9,10 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  
-  // 1. Local state taake input foran type ho (Smooth typing) 
+   
   const [value, setValue] = useState(searchParams.get("search") || "")
 
-  // 2. Debouncing Logic 
+  // Debouncing jo har type pa api call ni krta
  useEffect(() => {
   const timer = setTimeout(() => {
     const params = new URLSearchParams(searchParams.toString())
@@ -28,7 +27,7 @@ export function SearchInput({ placeholder }: { placeholder: string }) {
   }, 500)
   
   return () => clearTimeout(timer)
-}, [value]) // sirf value rakho — baaki hata do
+}, [value])
 
   return (
     <div className="relative flex-1 w-full">
