@@ -8,13 +8,13 @@ cloudinary.config({
 
 export const uploadOnCloudinary = async (buffer: Buffer, filename: string) => {
   try {
-    // Extension saaf karo taake .pdf.pdf na banay 
+    
     const cleanFileName = filename.split('.').slice(0, -1).join('.') || filename;
 
     const response = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          resource_type: "auto", // PDF ke liye Cloudinary khud best settings chunay ga
+          resource_type: "auto", 
           folder: "recruitment",
           public_id: `${Date.now()}-${cleanFileName.replace(/\s+/g, '_')}`, 
         },
@@ -26,7 +26,7 @@ export const uploadOnCloudinary = async (buffer: Buffer, filename: string) => {
       uploadStream.end(buffer);
     });
 
-    return (response as any).secure_url; // Direct HTTPS URL
+    return (response as any).secure_url; 
   } catch (error) {
     return null;
   }

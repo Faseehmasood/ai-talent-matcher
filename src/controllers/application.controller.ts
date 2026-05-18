@@ -10,57 +10,44 @@ import { applicationSchema } from "../lib/validations"
 import connectDB from "../lib/db"
 
 
-// APPLY FOR JOB — Sirf Candidate
+
 
 export const applyForJob = asyncHandler(async (req: NextRequest) => {
   await connectDB()
 
-  // Auth check — Sirf Candidate
+
   const user = await verifyJWT(req)
   if (user.role !== "candidate") {
     throw new ApiError(403, "Only candidates can apply for jobs!")
   }
 
-  // FormData se data nikalo — File bhi hai!
   const formData = await req.formData()
   const jobId = formData.get("jobId") as string
   const coverLetter = formData.get("coverLetter") as string
   const resumeFile = formData.get("resume") as File
 
-  // Zod validation
   const result = applicationSchema.safeParse({ jobId, coverLetter })
   if (!result.success) {
     throw new ApiError(400, result.error.issues[0].message)
   }
-
-  // Resume zaroori hai
   if (!resumeFile) {
     throw new ApiError(400, "Resume is required!")
   }
-
-  // File type check karo
   const allowedTypes = ["application/pdf", "image/jpeg", "image/png"]
   if (!allowedTypes.includes(resumeFile.type)) {
     throw new ApiError(400, "Only PDF and Images allowed!")
   }
 
-  // File size check — 5MB max
   if (resumeFile.size > 5 * 1024 * 1024) {
     throw new ApiError(400, "File size cannot exceed 5MB!")
   }
-
-  // Job exist karta hai?
   const job = await Job.findById(jobId)
   if (!job) {
     throw new ApiError(404, "Job not found!")
   }
-
-  // Job active hai?
   if (job.status !== "active") {
     throw new ApiError(400, "This job is no longer accepting applications!")
   }
-
-  // Pehle apply kiya hua hai?
   const existingApplication = await Application.findOne({
     job: jobId,
     candidate: user._id,
@@ -69,17 +56,13 @@ export const applyForJob = asyncHandler(async (req: NextRequest) => {
     throw new ApiError(409, "You have already applied for this job!")
   }
 
-  // File ko Buffer mein convert karo
   const bytes = await resumeFile.arrayBuffer()
   const buffer = Buffer.from(bytes)
-
-  // Cloudinary pe upload karo
   const resumeUrl = await uploadOnCloudinary(buffer, resumeFile.name)
   if (!resumeUrl) {
     throw new ApiError(500, "Resume upload failed!")
   }
 
-  // Application banao
   const application = await Application.create({
     job: jobId,
     candidate: user._id,
@@ -94,7 +77,6 @@ export const applyForJob = asyncHandler(async (req: NextRequest) => {
 })
 
 
-// GET MY APPLICATIONS — Candidate apni applications dekhe
 
 export const getMyApplications = asyncHandler(async (req: NextRequest) => {
   await connectDB()
@@ -115,7 +97,7 @@ export const getMyApplications = asyncHandler(async (req: NextRequest) => {
 })
 
 
-// GET JOB APPLICATIONS — HR dekhe
+
 
 export const getJobApplications = asyncHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
@@ -128,7 +110,7 @@ export const getJobApplications = asyncHandler(
 
     const jobId = context?.params?.id
 
-    // Pagination
+    
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "10")
@@ -163,8 +145,6 @@ export const getJobApplications = asyncHandler(
 )
 
 
-// UPDATE APPLICATION STATUS — Sirf HR
-
 export const updateApplicationStatus = asyncHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     await connectDB()
@@ -177,7 +157,7 @@ export const updateApplicationStatus = asyncHandler(
     const applicationId = context?.params?.id
     const { status } = await req.json()
 
-    // Valid status check
+    
     const validStatuses = [
       "pending",
       "reviewing",

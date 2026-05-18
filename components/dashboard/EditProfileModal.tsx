@@ -23,7 +23,7 @@ interface EditProfileProps {
     name: string;
     bio?: string;
     phone?: string;
-    skills?: string[]; //  Backend se array aayegi
+    skills?: string[];
 
   };
   role: string;
@@ -35,23 +35,22 @@ export function EditProfileModal({ user,role }: EditProfileProps) {
   
   const setAuth = useAuthStore((state) => state.setAuth)
 
-  // 1. Form State Initialization 
+ 
   const [formData, setFormData] = useState({
     name: user.name || "",
     bio: user.bio || "",
     phoneNumber: user.phone || "",
-    //  REASONING: Array ko string mein badlo taake input mein nazar aaye 
+ 
     skills: user.skills?.join(", ") || "" 
   })
 
-  // 2. Submit Logic 
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      //  DATA TRANSFORMATION 
-      // String "React, Node" ko badal kar ["React", "Node"] kar do
+    
       const finalData = {
         ...formData,
         skills: formData.skills 
@@ -93,7 +92,6 @@ export function EditProfileModal({ user,role }: EditProfileProps) {
           </DialogHeader>
 
           <div className="grid gap-5 py-6">
-            {/* Full Name */}
             <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <User className="w-3.5 h-3.5" /> Full Name
@@ -106,7 +104,7 @@ export function EditProfileModal({ user,role }: EditProfileProps) {
               />
             </div>
             
-            {/* Bio */}
+            
             <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Info className="w-3.5 h-3.5" /> Bio / Headline
@@ -119,7 +117,7 @@ export function EditProfileModal({ user,role }: EditProfileProps) {
               />
             </div>
 
-            {/*  NEW: SKILLS INPUT  */}
+    
             {role === "candidate" && (
             <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
@@ -135,7 +133,7 @@ export function EditProfileModal({ user,role }: EditProfileProps) {
             </div>
           )}
 
-            {/* Phone Number */}
+         
             <div className="space-y-1.5">
               <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5" /> Phone Number

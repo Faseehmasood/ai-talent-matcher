@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose"
 
-//Typescript interface for application
 export interface IApplication extends Document {
   job: mongoose.Types.ObjectId
   candidate: mongoose.Types.ObjectId

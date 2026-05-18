@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { createJobAction } from "@/src/actions/job.actions" //  Action import kiya
+import { createJobAction } from "@/src/actions/job.actions"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,7 @@ export function CreateJobModal() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   
-  // 1. Form State Define karo 
+   
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -22,15 +22,15 @@ export function CreateJobModal() {
     minSalary: "",
     maxSalary: "",
     description: "",
-    skills: "" // Hum isay comma-separated string lenge phir array banayenge
+    skills: ""
   })
 
-  // 2. Submit Logic 
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    //  DATA FORMATTING: Backend ke mutabiq dhalo 
+  
     const finalData = {
       title: formData.title,
       company: formData.company,
@@ -42,15 +42,15 @@ export function CreateJobModal() {
         max: Number(formData.maxSalary),
         currency: "PKR"
       },
-      skills: formData.skills.split(",").map(s => s.trim()) // String to Array
+      skills: formData.skills.split(",").map(s => s.trim())
     }
 
     const response = await createJobAction(finalData)
 
     if (response.success) {
       alert("Job Posted Successfully!")
-      setOpen(false) // Modal band kar do
-      setFormData({ title: "", company: "", location: "", jobType: "full-time", minSalary: "", maxSalary: "", description: "", skills: "" }) // Reset form
+      setOpen(false)
+      setFormData({ title: "", company: "", location: "", jobType: "full-time", minSalary: "", maxSalary: "", description: "", skills: "" })
     } else {
       alert(response.message || "Failed to post job. Check all fields.")
     }

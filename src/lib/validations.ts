@@ -1,8 +1,6 @@
 import { z } from "zod"
 
-// ==================
-// AUTH VALIDATIONS
-// ==================
+// AUTH VALIDATION
 export const registerSchema = z.object({
   name: z
     .string()
@@ -72,9 +70,8 @@ export const createJobSchema = z.object({
 })
 
 export const updateJobSchema = createJobSchema.partial()
-// .partial() = Sab fields optional ho jaate hain! 
 
-// APPLICATION VALIDATIONS
+
 
 export const applicationSchema = z.object({
   jobId: z.string().min(1, "Job ID is required!"),
@@ -84,7 +81,7 @@ export const applicationSchema = z.object({
     .optional(),
 })
 
-// Interview Validations
+
 
 export const interviewSchema = z.object({
   jobId: z.string().min(1, "Job ID is required!"),
@@ -92,8 +89,8 @@ export const interviewSchema = z.object({
   interviewDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid date format! Use YYYY-MM-DD",
   }),
-  startTime: z.string().min(1, "Start time is required!"), // e.g. "09:00"
-  endTime: z.string().min(1, "End time is required!"),   // e.g. "09:30"
+  startTime: z.string().min(1, "Start time is required!"), 
+  endTime: z.string().min(1, "End time is required!"), 
   type: z.enum(["onsite", "remote"]).default("onsite"), 
   location: z.string().min(1, "Location (Address or Link) is required!"),
   notes: z.string().max(500, "Notes cannot exceed 500 characters!").optional(),
@@ -102,10 +99,6 @@ export const interviewSchema = z.object({
 
 
 
-
-// TYPE EXPORTS
-
-// TypeScript types automatically ban jaate hain! 
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type CreateJobInput = z.infer<typeof createJobSchema>
@@ -115,7 +108,7 @@ export type InterviewInput = z.infer<typeof interviewSchema>
 
 
 
-// 1. Profile Update (Text only)
+ 
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   bio: z.string().max(150).optional(),
@@ -123,7 +116,7 @@ export const updateProfileSchema = z.object({
   skills: z.array(z.string()).optional(),
 })
 
-// 2. Password Change
+ 
 export const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, "Old password is required"),
   newPassword: z.string().min(8, "New password must be at least 8 characters"),

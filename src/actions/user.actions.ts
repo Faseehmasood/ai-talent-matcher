@@ -1,7 +1,7 @@
 "use server";
 
 import connectDB from "@/src/lib/db";
-import { User } from "@/src/models/users.model"; // Ensure path is correct
+import { User } from "@/src/models/users.model";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { revalidatePath } from "next/cache";
@@ -9,7 +9,6 @@ import { updateProfileSchema, changePasswordSchema } from "@/src/lib/validations
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import connection from "@/src/lib/db";
 
-// Environment Variable Safety
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
 if (!secretKey) {
   throw new Error("ACCESS_TOKEN_SECRET is not defined in .env file!");
@@ -17,8 +16,7 @@ if (!secretKey) {
 const JWT_SECRET = new TextEncoder().encode(secretKey);
 
 
-// PRIVATE HELPER: Token Verification
-
+ 
 async function verifyToken() {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
@@ -33,21 +31,21 @@ async function verifyToken() {
 }
 
 
-// 1. UPDATE PROFILE ACTION 
+ 
 
 export async function updateProfileAction(data: any) {
   try {
     await connectDB();
     const { payload, error } = await verifyToken();
     if (error || !payload) return { success: false, message: error || "UNAUTHORIZED" };
-    console.log("DATA:", data)           // ← YEH ADD KARO
+    console.log("DATA:", data)         
     console.log("SKILLS:", data.skills)
 
-    // Zod Validation Check
+    
     const result = updateProfileSchema.safeParse(data);
     if (!result.success) return { success: false, message: result.error.issues[0].message };
 
-    //  REASONING: { new: true } use kiya hai taake updated record wapas mile 
+     
     const updatedUser = await User.findByIdAndUpdate(
       payload._id, 
       { $set: result.data }, 
@@ -59,11 +57,10 @@ export async function updateProfileAction(data: any) {
     revalidatePath("/profile"); 
     revalidatePath("/hr/candidates");
     
-    //  ASLI KAAM: Naya user data bhej rahe hain taake Zustand update ho sakay
     return { 
       success: true, 
       message: "Profile updated successfully!",
-      user: JSON.parse(JSON.stringify(updatedUser)) // Clean for client
+      user: JSON.parse(JSON.stringify(updatedUser)) 
     };
   } catch (error: any) {
     return { success: false, message: "Failed to update profile" };
@@ -71,7 +68,7 @@ export async function updateProfileAction(data: any) {
 }
 
 
-// 2. CHANGE PASSWORD ACTION 
+ 
 
 export async function changePasswordAction(formData: any) {
   try {
@@ -106,7 +103,7 @@ export async function changePasswordAction(formData: any) {
 }
 
 
-// 3. LOGOUT ACTION 
+ 
 
 export async function logoutAction() {
   const cookieStore = await cookies();
@@ -116,7 +113,7 @@ export async function logoutAction() {
 }
 
 
-// 4. UPDATE AVATAR ACTION 
+ 
 
 export async function updateUserAvatarAction(formData: FormData) {
   try {
@@ -133,7 +130,7 @@ export async function updateUserAvatarAction(formData: FormData) {
 
     if (!avatarUrl) return { success: false, message: "Upload failed" };
 
-    //  REASONING: Photo update ke baad updated user mangwao
+     
     const updatedUser = await User.findByIdAndUpdate(
       payload._id, 
       { $set: { avatar: avatarUrl } },
@@ -145,14 +142,14 @@ export async function updateUserAvatarAction(formData: FormData) {
     return { 
       success: true, 
       avatar: avatarUrl,
-      user: JSON.parse(JSON.stringify(updatedUser)) // Zustand sync ke liye
+      user: JSON.parse(JSON.stringify(updatedUser))
     };
   } catch (error) {
     return { success: false, message: "Server Error" };
   }
 }
 
-// Toggle user status (HR/Admin only)
+
 
 export async function toggleUserStatusAction(userId: string) {
   try {
@@ -160,7 +157,6 @@ export async function toggleUserStatusAction(userId: string) {
     const { payload, error } = await verifyToken();
     if (error || !payload) return { success: false, message: error || "UNAUTHORIZED" };
 
-    // SECURITY LOCK: Sirf HR ya Admin hi status badal saktay hain
     if (payload.role !== "admin" && payload.role !== "hr") {
       return { success: false, message: "Forbidden: Unauthorized action" };
     }
@@ -168,11 +164,11 @@ export async function toggleUserStatusAction(userId: string) {
     const targetUser = await User.findById(userId);
     if (!targetUser) return { success: false, message: "User not found" };
 
-    // LOGIC: Status ko toggle karo (true -> false | false -> true) 
+    
     targetUser.isActive = !targetUser.isActive;
     await targetUser.save({ validateBeforeSave: false });
 
-    // Refresh saare relevant pages
+  
     revalidatePath("/hr/candidates");
     revalidatePath("/admin/users");
 
@@ -187,9 +183,9 @@ export async function toggleUserStatusAction(userId: string) {
 }
 
 
-//Admin Users 
+ 
 
-// src/actions/user.actions.ts mein getAllUsersAction dhoondo aur update karo
+ 
 
 export async function getAllUsersAction() {
   await connection();
@@ -201,8 +197,7 @@ export async function getAllUsersAction() {
       return { success: false, code: "FORBIDDEN" };
     }
 
-    // ASLI FIX: Query se 'isActive: true' nikaal do 
-    // Hum sirf ye check karenge ke Admin khud ko list mein na dekhay
+   
     const users = await User.find({ 
         _id: { $ne: payload._id } 
     })
@@ -220,7 +215,7 @@ export async function getAllUsersAction() {
 }
 
 
-// Admin update User 
+ 
 
 export async function adminUpdateUserAction(userId: string, data: { name: string, role: string }) {
   await connection();
@@ -228,12 +223,12 @@ export async function adminUpdateUserAction(userId: string, data: { name: string
     await connectDB();
     const { payload, error } = await verifyToken();
     
-    // SECURITY: Sirf Admin doosron ka data badal sakta hai 🛡️
+     
     if (error || !payload || payload.role !== "admin") {
       return { success: false, message: "Forbidden" };
     }
 
-    // Database mein update karo ✅
+   
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: { name: data.name, role: data.role } },
@@ -242,11 +237,11 @@ export async function adminUpdateUserAction(userId: string, data: { name: string
 
     if (!updatedUser) return { success: false, message: "User not found" };
 
-    // Dashboard refresh karo taake table update ho jaye
+    
     revalidatePath("/admin/users");
     revalidatePath("/hr/candidates");
 
-    return { success: true, message: "User updated successfully! ✨" };
+    return { success: true, message: "User updated successfully!" };
   } catch (error: any) {
     return { success: false, message: "Server Error" };
   }
@@ -258,28 +253,28 @@ export async function adminCreateUserAction(userData: any) {
   try {
     await connectDB();
     
-    //  Check karo ke request bhejne wala khud Admin hai? 
+     
     const { payload, error } = await verifyToken();
     if (error || !payload || payload.role !== "admin") {
       return { success: false, message: "Forbidden: Only Admins can create internal accounts!" };
     }
 
-    // 2. VALIDATION: Check karo email pehle se toh nahi?
+
     const { name, email, password, role } = userData;
     const existingUser = await User.findOne({ email });
     if (existingUser) return { success: false, message: "User with this email already exists!" };
 
-    // 3. CREATE: Naya user banao (Staff ya Partner) 
-    // Note: Password model middleware se khud hash hoga
+    
+ 
     const newUser = await User.create({
       name,
       email,
       password, 
       role,
-      isVerified: true, //  Admin ne banaya hai toh verification bypass!
+      isVerified: true, 
     });
 
-    //  Admin users table ko refresh karo
+    
     revalidatePath("/admin/users");
 
     return { 

@@ -8,7 +8,7 @@ import { connection } from "next/server";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
 
-// 1. CREATE NOTIFICATION
+// create notification
 export async function createNotification(data: {
   recipient: string;
   sender: string;
@@ -25,7 +25,7 @@ export async function createNotification(data: {
   }
 }
 
-// 2. GET MY NOTIFICATIONS
+// get my notifications
 export async function getMyNotificationsAction() {
   await connection();
   try {
@@ -57,7 +57,7 @@ export async function getMyNotificationsAction() {
   }
 }
 
-// 3. MARK AS READ
+// mark as read
 export async function markAsReadAction(notificationId: string) {
   try {
     await connectDB();
@@ -67,9 +67,9 @@ export async function markAsReadAction(notificationId: string) {
 
     const { payload } = await jwtVerify(token, JWT_SECRET);
 
-    // Sirf apni notification read mark karo
+    
     await Notification.findOneAndUpdate(
-      { _id: notificationId, recipient: payload._id }, // ← SECURE
+      { _id: notificationId, recipient: payload._id },
       { isRead: true }
     );
 

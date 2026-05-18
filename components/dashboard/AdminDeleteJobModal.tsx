@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,6 @@ export function AdminDeleteJobModal({ job }: { job: any }) {
   const [reason, setReason] = useState("")
 
   const handleDelete = async () => {
-    //  REASONING: Bina wajah ke delete nahi karne dena 
     if (!reason.trim() || reason.length < 5) return alert("Please provide a valid reason (min 5 chars) for HR.");
 
     setLoading(true)

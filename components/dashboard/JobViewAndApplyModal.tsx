@@ -20,8 +20,7 @@ import {
   FileCheck, 
   MapPin, 
   DollarSign, 
-  Briefcase,
-  AlertCircle
+  Briefcase
 } from "lucide-react"
 
 export function JobViewAndApplyModal({ job }: { job: any }) {
@@ -30,18 +29,18 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
   const [file, setFile] = useState<File | null>(null)
   const [coverLetter, setCoverLetter] = useState("")
 
-  // ASLI SUBMIT LOGIC 
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Basic frontend checks
+    
     if (!file) return alert("Please upload your resume first!")
     if (file.type !== "application/pdf") return alert("Only PDF files are allowed!")
 
     setLoading(true)
     
     try {
-      //  MULTIPART DATA: Files hamesha FormData mein jati hain 
+       
       const formData = new FormData()
       formData.append("jobId", job._id)
       formData.append("coverLetter", coverLetter)
@@ -54,7 +53,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
         setStep("view")
         setFile(null)
         setCoverLetter("")
-        window.location.reload() // UI Sync (Counts update ho jayenge)
+        window.location.reload() 
       } else {
         alert(response.message || "Failed to apply. You might have already applied.")
       }
@@ -81,7 +80,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
       <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
         {step === "view" ? (
           <div className="flex flex-col h-full">
-            {/* JOB VIEW SECTION */}
+            
             <div className="bg-primary/5 p-8 border-b border-border/50">
                <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-2xl border border-border shadow-sm">
@@ -122,14 +121,14 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col">
-            {/* APPLY FORM SECTION */}
+             
             <div className="bg-primary/5 p-8 border-b border-border/50">
                <DialogTitle className="text-2xl font-black tracking-tight">Submit Application</DialogTitle>
                <DialogDescription className="font-medium">Applying for <span className="text-primary">{job.title}</span></DialogDescription>
             </div>
 
             <div className="p-8 space-y-6">
-              {/* File Upload UI */}
+               
               <div className="space-y-2">
                 <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Upload Resume (PDF)</Label>
                 <div className="relative border-2 border-dashed border-border rounded-[2rem] p-10 flex flex-col items-center justify-center bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group">
@@ -156,7 +155,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
                 </div>
               </div>
 
-              {/* Cover Letter */}
+               
               <div className="space-y-2">
                 <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Message to Recruiter</Label>
                 <Textarea 
@@ -168,7 +167,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
                 />
               </div>
 
-              {/* Actions */}
+               
               <div className="flex gap-3 pt-2">
                  <Button type="button" variant="outline" onClick={() => setStep("view")} className="flex-1 rounded-xl h-12 font-bold">Back</Button>
                  <Button type="submit" disabled={loading} className="flex-2 rounded-xl h-12 font-black shadow-lg shadow-primary/20">

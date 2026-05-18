@@ -2,13 +2,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts"
 
-// INTERFACE: Batao ke kaisa data chahiye
+
 interface ChartProps {
   data: { month: string; applicants: number }[];
 }
 
 export function Chart({ data }: ChartProps) {
-  // Agar database khali hai toh yeh "Placeholder" dikhayega
+
   const defaultData = [
     { month: "No Data", applicants: 0 }
   ];

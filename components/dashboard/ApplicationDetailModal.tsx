@@ -6,8 +6,7 @@ import { Eye, FileText, Mail, Calendar, Download, UserCheck, UserX, Loader2 } fr
 import { Badge } from "@/components/ui/badge"
 import { updateApplicationStatusAction } from "@/src/actions/application.actions"
 
-//  REASONING: Hum ne 'hideActions' prop add kiya 
-// Default value 'false' rakhi taake applications page par buttons nazar aayen.
+
 export function ApplicationDetailModal({ 
   application, 
   hideActions = false 
@@ -38,7 +37,7 @@ export function ApplicationDetailModal({
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] border-border shadow-2xl p-0 overflow-hidden">
-        {/* Header Section */}
+    
         <div className="bg-primary/5 p-8 border-b border-border/50">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-xl border border-border shadow-sm">
@@ -52,7 +51,6 @@ export function ApplicationDetailModal({
         </div>
 
         <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
-          {/* Status, Contact & Cover Letter sections (Wahi rahen ge) ... */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-muted/40 border border-border/50">
               <p className="text-[10px] uppercase font-black text-muted-foreground mb-1 tracking-widest text-center">Status</p>
@@ -85,7 +83,7 @@ export function ApplicationDetailModal({
             </div>
           </div>
 
-          {/* Action Buttons (Email & Download) */}
+        
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button asChild variant="outline" className="flex-1 rounded-xl h-12 font-bold border-primary/20 text-primary">
               <a href={`mailto:${application.email}?subject=Interview Update for ${application.role}`}>
@@ -100,7 +98,6 @@ export function ApplicationDetailModal({
             </Button>
           </div>
 
-          {/*  ASLI LOGIC: Agar hideActions 'false' hai, sirf tab dikhao  */}
           {!hideActions && (
             <div className="pt-6 border-t border-border/50 grid grid-cols-2 gap-3">
               <Button 

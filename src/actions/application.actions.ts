@@ -25,7 +25,7 @@ async function verifyToken() {
   }
 }
 
-// 1. APPLY FOR JOB
+
 export async function applyForJobAction(formData: FormData) {
   await connection();
   try {
@@ -41,12 +41,10 @@ export async function applyForJobAction(formData: FormData) {
     const coverLetter = formData.get("coverLetter") as string;
     const resumeFile = formData.get("resume") as File;
 
-    //  FIX: Resume file check
+
     if (!resumeFile) {
       return { success: false, message: "Resume is required" }
     }
-
-    // File Security Checks
     if (resumeFile.type !== "application/pdf") {
       return { success: false, message: "Only PDF resumes are allowed!" }
     }
@@ -54,30 +52,27 @@ export async function applyForJobAction(formData: FormData) {
       return { success: false, message: "Resume must be under 5MB!" }
     }
 
-    // Zod Validation
     const result = applicationSchema.safeParse({ jobId, coverLetter });
     if (!result.success) {
       return { success: false, message: result.error.issues[0].message };
     }
 
-    // Job dhoondo HR ki ID ke liye
+ 
     const job = await Job.findById(jobId);
     if (!job) return { success: false, message: "Job not found" };
 
-    // Duplicate check
     const existing = await Application.findOne({ 
       job: jobId, 
       candidate: payload._id 
     });
     if (existing) return { success: false, message: "Already applied!" };
 
-    // Cloudinary Upload
+
     const arrayBuffer = await resumeFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const resumeUrl = await uploadOnCloudinary(buffer, resumeFile.name);
     if (!resumeUrl) return { success: false, message: "Resume upload failed" };
 
-    // Save to DB
     await Application.create({
       job: jobId,
       candidate: payload._id,
@@ -85,10 +80,10 @@ export async function applyForJobAction(formData: FormData) {
       coverLetter: result.data.coverLetter,
     });
 
-    //  HR ko notify karo
+
     await createNotification({
       recipient: job.postedBy.toString(),
-      sender: payload._id as string, // ← FIX
+      sender: payload._id as string,
       message: `New applicant for ${job.title}`,
       link: "/hr/applications",
       type: "info"
@@ -102,12 +97,10 @@ export async function applyForJobAction(formData: FormData) {
     return { success: true, message: "Applied successfully! 🎉" };
 
   } catch (error: any) {
-    console.error("APPLY_ERROR:", error.message) // ← FIX
+    console.error("APPLY_ERROR:", error.message)
     return { success: false, message: "Server Error" };
   }
 }
-
-// 2. GET ALL APPLICATIONS (HR)
 export async function getHRApplicationsAction() {
   await connection();
   try {
@@ -119,8 +112,8 @@ export async function getHRApplicationsAction() {
     if (myJobIds.length === 0) return { success: true, applications: [] };
 
     const applications = await Application.find({ job: { $in: myJobIds } })
-      .select("resume coverLetter status createdAt candidate job") // ← FIX
-      .populate("candidate", "name email avatar phoneNumber")      // ← FIX
+      .select("resume coverLetter status createdAt candidate job") 
+      .populate("candidate", "name email avatar phoneNumber")      
       .populate("job", "title")
       .sort({ createdAt: -1 })
       .lean();
@@ -131,12 +124,12 @@ export async function getHRApplicationsAction() {
     };
 
   } catch (error: any) {
-    console.error("GET_HR_APPS_ERROR:", error.message) // ← FIX
+    console.error("GET_HR_APPS_ERROR:", error.message)
     return { success: false, code: "SERVER_ERROR" };
   }
 }
 
-// 3. UPDATE APPLICATION STATUS (HR)
+
 export async function updateApplicationStatusAction(
   applicationId: string,
   status: string
@@ -152,7 +145,6 @@ export async function updateApplicationStatusAction(
 
     const job = application.job as any;
 
-    // Security: Sirf job ka owner status badal sakta
     if (job.postedBy.toString() !== payload._id as string) {
       return { success: false, code: "UNAUTHORIZED" };
     }
@@ -160,7 +152,7 @@ export async function updateApplicationStatusAction(
     application.status = status;
     await application.save();
 
-    //  Candidate ko notify karo
+
     await createNotification({
       recipient: application.candidate.toString(),
       sender: payload._id as string, // ← FIX
@@ -172,12 +164,12 @@ export async function updateApplicationStatusAction(
     revalidatePath("/hr/applications");
     revalidatePath("/hr/dashboard");
     revalidatePath("/candidate/applications");
-    revalidatePath("/candidate/dashboard"); // ← FIX
+    revalidatePath("/candidate/dashboard"); 
 
     return { success: true };
 
   } catch (error: any) {
-    console.error("UPDATE_STATUS_ERROR:", error.message) // ← FIX
+    console.error("UPDATE_STATUS_ERROR:", error.message)
     return { success: false, code: "SERVER_ERROR" };
   }
 }

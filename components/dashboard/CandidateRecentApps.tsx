@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card" 
 import { Building2 } from "lucide-react"
 
-// Mock data: Sirf is candidate ki apni applications
+
 const myRecentApps = [
   {
     id: "APP-001",

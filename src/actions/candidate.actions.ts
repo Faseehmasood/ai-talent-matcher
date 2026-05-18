@@ -1,7 +1,7 @@
 "use server";
 
 import connectDB from "@/src/lib/db";
-import { User } from "@/src/models/users.model"; // Ensure correct path
+import { User } from "@/src/models/users.model";
 import { Application } from "@/src/models/application.model";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
@@ -10,7 +10,7 @@ import { connection } from "next/server";
 const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
 
 
-// 1. GET ALL CANDIDATES (For HR/Admin) 
+ 
 
 export async function getAllCandidatesAction(searchQuery: string = "", fetchArchived: boolean = false) {
   await connection();
@@ -24,19 +24,19 @@ export async function getAllCandidatesAction(searchQuery: string = "", fetchArch
 
     const { payload } = await jwtVerify(token, JWT_SECRET);
     
-    // Security: Only HR/Admin can browse candidates pool 
+     
     if (payload.role !== "hr" && payload.role !== "admin") {
       return { success: false, code: "FORBIDDEN" };
     }
 
-    // DYNAMIC FILTER LOGIC
-    // fetchArchived control karta hai ke 'Active' log dikhane hain ya 'Archived'
+    
+    
     let queryFilter: any = { 
       role: "candidate", 
       isActive: fetchArchived ? false : true 
     };
 
-    // Smart Search in Name and Skills 
+    
     if (searchQuery) {
       queryFilter.$or = [
         { name: { $regex: searchQuery, $options: "i" } },
@@ -61,7 +61,6 @@ export async function getAllCandidatesAction(searchQuery: string = "", fetchArch
 }
 
 
-// 2. GET MY APPLICATIONS (For Candidate) 
 
 export async function getMyApplicationsAction() {
   await connection();
@@ -75,7 +74,7 @@ export async function getMyApplicationsAction() {
 
     const { payload } = await jwtVerify(token, JWT_SECRET);
 
-    // Fetch applications with deep population for job details 🔗
+    
     const applications = await Application.find({ candidate: payload._id })
       .populate("job", "title company location salary jobType status")
       .sort({ createdAt: -1 })

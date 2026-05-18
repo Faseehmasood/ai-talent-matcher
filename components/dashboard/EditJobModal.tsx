@@ -11,7 +11,7 @@ export function EditJobModal({ job }: { job: any }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // 1. Initial State mein purana data bharo 
+
   const [formData, setFormData] = useState({
     title: job.title,
     location: job.location,
@@ -20,14 +20,14 @@ export function EditJobModal({ job }: { job: any }) {
     maxSalary: job.salary?.max || "",
     description: job.description || "",
     status: job.status,
-    skills: job.skills?.join(", ") || "" // Array to String
+    skills: job.skills?.join(", ") || ""
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    // Data format as per Zod
+    
     const finalUpdates = {
       ...formData,
       salary: {
@@ -64,14 +64,13 @@ export function EditJobModal({ job }: { job: any }) {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-             {/* ... Inputs (Wahi jo Create Modal mein thay, bas value=formData se bind honge) ... */}
-             {/* Title example: */}
+             
              <div className="space-y-1">
                 <Label>Job Title</Label>
                 <Input value={formData.title} onChange={(e)=>setFormData({...formData, title: e.target.value})} className="rounded-xl" />
              </div>
              
-             {/* Status Selection (Very Important for Edit) */}
+            
              <div className="space-y-1">
                 <Label>Job Status</Label>
                 <select value={formData.status} onChange={(e)=>setFormData({...formData, status: e.target.value})} className="...">

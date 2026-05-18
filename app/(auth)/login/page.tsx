@@ -35,14 +35,14 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google"
-  }
+  // const handleGoogleLogin = () => {
+  //   window.location.href = "/api/auth/google"
+  // }
 
   return (
     <div className="min-h-screen flex">
 
-      {/* Left Side — Branding */}
+    
       <div className="hidden lg:flex lg:w-1/2 bg-foreground flex-col justify-between p-12">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center">
@@ -81,7 +81,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Side — Login Form */}
+    
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
 
@@ -96,7 +96,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Header */}
+          
           <div>
             <h2 className="text-3xl font-bold">Welcome back</h2>
             <p className="text-muted-foreground mt-2">
@@ -104,7 +104,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Form */}
+        
           <form onSubmit={handleLogin} className="space-y-4">
 
             <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function LoginPage() {
 
           </form>
 
-          {/* Divider */}
+          
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -163,7 +163,7 @@ export default function LoginPage() {
           </div>
 
           {/* Google Button */}
-          <Button
+          {/* <Button
             type="button"
             variant="outline"
             className="w-full h-11 rounded-xl flex items-center gap-3"
@@ -176,7 +176,7 @@ export default function LoginPage() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             Continue with Google
-          </Button>
+          </Button> */}
 
           {/* Register Link */}
           <p className="text-center text-sm text-muted-foreground">

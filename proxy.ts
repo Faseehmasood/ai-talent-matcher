@@ -8,12 +8,12 @@ export async function proxy(req: NextRequest) {
   const accessToken = req.cookies.get("accessToken")?.value
   const refreshToken = req.cookies.get("refreshToken")?.value
 
-  // Auth routes ignore karo
+
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next()
   }
 
-  // Login/register pe already logged in ho toh dashboard pe bhejo
+
   if (pathname === "/login" || pathname === "/register") {
     if (accessToken) {
       try {
@@ -33,19 +33,17 @@ export async function proxy(req: NextRequest) {
 
   if (isProtectedPath) {
 
-    // Koi token nahi — login pe bhejo
     if (!accessToken && !refreshToken) {
       return NextResponse.redirect(new URL("/login", req.url))
     }
 
-    // Access token nahi, refresh hai — silent refresh
     if (!accessToken && refreshToken) {
       const url = new URL("/api/auth/refresh-token", req.url)
       url.searchParams.set("callback", pathname)
       return NextResponse.redirect(url)
     }
 
-    // Access token hai — verify karo
+
     if (accessToken) {
       try {
         const { payload } = await jwtVerify(accessToken, JWT_SECRET)
@@ -64,7 +62,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next()
 
       } catch {
-        // Token expire — refresh pe bhejo
+        
         const url = new URL("/api/auth/refresh-token", req.url)
         url.searchParams.set("callback", pathname)
         return NextResponse.redirect(url)

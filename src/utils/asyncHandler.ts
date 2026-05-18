@@ -10,10 +10,10 @@ type RouteHandler = (
 const asyncHandler = (fn: RouteHandler): RouteHandler => {
   return async (req: NextRequest, context?: { params: Record<string, string> }) => {
     try {
-      // Asli function chalao
+  
       return await fn(req, context)
     } catch (error) {
-      // Agar ApiError hai
+  
       if (error instanceof ApiError) {
         return NextResponse.json(
           {
@@ -25,7 +25,6 @@ const asyncHandler = (fn: RouteHandler): RouteHandler => {
         )
       }
 
-      // Agar koi aur error hai
       return NextResponse.json(
         {
           success: false,

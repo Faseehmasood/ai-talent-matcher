@@ -17,7 +17,7 @@ const notificationSchema = new Schema(
     message: { type: String, required: true },
     type: { type: String, enum: ["info", "success", "warning", "alert"], default: "info" },
     link: { type: String, default: "/dashboard" },
-    //  FIX: Capital 'B' for Mongoose and default false 
+
     isRead: { type: Boolean, default: false }, 
   },
   { timestamps: true }

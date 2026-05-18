@@ -11,8 +11,6 @@ declare global {
     promise: Promise<mongoose.Connection> | null
   }
 }
-
-// Global variable mein connection store karte hain
 let cached = global.mongoose
 
 if (!cached) {
@@ -23,13 +21,10 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  // Agar connection pehle se hai toh wahi return karo
   if (cached.conn) {
     console.log("MongoDB already connected!")
     return cached.conn
   }
-
-  // Agar connection nahi hai toh naya banao
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(`${MONGODB_URI}`, {

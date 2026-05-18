@@ -8,7 +8,7 @@ export interface IUser extends Document {
   password: string
   role: "admin" | "hr" | "candidate"
   avatar?: string
-  refreshToken?: string // ← Naya add kiya
+  refreshToken?: string 
   isGoogleUser?: boolean
 needsRoleSelection?: boolean
   isActive: boolean
@@ -85,13 +85,13 @@ skills: {
   }
 )
 
-// Password encrypt karo save se pehle
+// password encrypt before save
 userSchema.pre("save", async function(this: IUser) {
   if (!this.isModified("password")) return
   this.password = await bcrypt.hash(this.password, 10)
 })
 
-// Password compare karo
+
 userSchema.methods.comparePassword = async function(
   this: IUser,
   password: string
@@ -99,7 +99,7 @@ userSchema.methods.comparePassword = async function(
   return await bcrypt.compare(password, this.password)
 }
 
-// Access Token generate karo
+
 userSchema.methods.generateAccessToken = function(this: IUser): string {
   return jwt.sign(
     {
@@ -114,7 +114,7 @@ userSchema.methods.generateAccessToken = function(this: IUser): string {
   )
 }
 
-// Refresh Token generate karo
+
 userSchema.methods.generateRefreshToken = function(this: IUser): string {
   return jwt.sign(
     {

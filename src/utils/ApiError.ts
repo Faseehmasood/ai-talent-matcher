@@ -11,7 +11,6 @@ class ApiError extends Error {
     errors: unknown[] = [],
     stack: string = ""
   ) {
-    // JavaScript ka built-in Error class ko call kar rahe hain
     super(message)
     
     this.statusCode = statusCode
@@ -20,7 +19,6 @@ class ApiError extends Error {
     this.success = false
     this.errors = errors
 
-    // Stack trace — error kahan hua yeh batata hai
     if (stack) {
       this.stack = stack
     } else {

@@ -12,7 +12,7 @@ export function AdminJobsTable({ jobs }: { jobs: any[] }) {
   
   useEffect(() => { setMounted(true) }, [])
 
-  // REASONING: Hydration mismatch rokne ke liye guard lagaya 
+  //  Hydration mismatch rokne ka liya  lagaya 
   if (!mounted) return <div className="p-20 text-center text-muted-foreground animate-pulse font-medium">Synchronizing global directory...</div>
 
   const statusColor = (status: string) => {
@@ -67,10 +67,8 @@ export function AdminJobsTable({ jobs }: { jobs: any[] }) {
 
                 <TableCell className="text-right px-6">
                    <div className="flex items-center justify-end gap-1">
-                      {/* View Action (Same Modal) */}
                       <JobDetailModal job={job} />
-
-                      {/*  SPECIAL ADMIN DELETE MODAL (Reasoning included)  */}
+                      
                       <AdminDeleteJobModal job={job} />
                    </div>
                 </TableCell>

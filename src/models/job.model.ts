@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose"
 
-// Job ka structure — TypeScript ke liye
 export interface IJob extends Document {
   title: string
   description: string
@@ -19,7 +18,6 @@ export interface IJob extends Document {
   updatedAt: Date
 }
 
-// Job ka Schema — MongoDB ke liye
 const jobSchema = new Schema<IJob>(
   {
     title: {
@@ -58,7 +56,7 @@ const jobSchema = new Schema<IJob>(
       },
     },
     skills: {
-      type: [String], // Array of strings
+      type: [String],
       required: [true, "Skills are required"],
     },
     jobType: {
@@ -73,7 +71,7 @@ const jobSchema = new Schema<IJob>(
     },
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // User model se connected
+      ref: "User",
       required: [true, "Posted by is required"],
     },
   },

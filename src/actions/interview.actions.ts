@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { connection } from "next/server";
 import { revalidatePath } from "next/cache";
-import { interviewSchema } from "@/src/lib/validations";
+import { interviewSchema,InterviewInput } from "@/src/lib/validations";
 import { createNotification } from "@/src/actions/notification.actions";
 
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
@@ -26,7 +26,7 @@ async function verifyToken() {
   }
 }
 
-// 1. GET MY SCHEDULE
+
 export async function getMyScheduleAction() {
   await connection();
   try {
@@ -59,8 +59,8 @@ export async function getMyScheduleAction() {
   }
 }
 
-// 2. CREATE INTERVIEW
-export async function createInterviewAction(interviewData: any) {
+ 
+export async function createInterviewAction(interviewData: InterviewInput) {
   await connection();
   try {
     await connectDB();
@@ -84,7 +84,7 @@ export async function createInterviewAction(interviewData: any) {
       notes: result.data.notes,
     });
 
-    // FIX 2: Interview bana tabhi aage chalo
+    
     if (!interview) return { success: false, message: "Interview create failed" };
 
     await Application.findOneAndUpdate(
@@ -114,7 +114,7 @@ export async function createInterviewAction(interviewData: any) {
   }
 }
 
-// 3. UPDATE INTERVIEW STATUS
+ 
 export async function updateInterviewStatusAction(interviewId: string, status: string) {
   await connection();
   try {
@@ -130,13 +130,13 @@ export async function updateInterviewStatusAction(interviewId: string, status: s
 
     if (!updated) return { success: false, code: "NOT_FOUND" };
 
-    // Har status ke liye dynamic message
+ 
     let notificationMessage = "";
     let notificationType: "info" | "success" | "warning" | "alert" = "info";
 
     if (status === "cancelled") {
       notificationMessage = `Your interview for ${(updated.job as any).title} has been cancelled. HR will contact you soon.`;
-      notificationType = "alert"; // Red notification
+      notificationType = "alert";
     } else if (status === "completed") {
       notificationMessage = `Your interview for ${(updated.job as any).title} is completed. Check back for updates!`;
       notificationType = "success";

@@ -20,32 +20,29 @@ export function AddUserModal() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // 1. FORM STATE: Initial values tayaar hain 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "Staff123!", // Default temporary password
+    password: "Staff123!",
     role: "hr"
   })
 
-  //  ASLI SUBMIT HANDLER 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Basic validation
     if (!formData.name || !formData.email) {
       return alert("Please fill in all required fields!")
     }
 
     setLoading(true)
     try {
-      // Backend API call 
       const response = await adminCreateUserAction(formData)
 
       if (response.success) {
         alert(response.message)
-        setOpen(false) // Modal band karo
-        setFormData({ name: "", email: "", password: "Staff123!", role: "hr" }) // Form saaf karo 
+        setOpen(false) 
+        setFormData({ name: "", email: "", password: "Staff123!", role: "hr" }) 
       } else {
         alert("Error: " + response.message)
       }
@@ -58,7 +55,7 @@ export function AddUserModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* TRIGGER BUTTON (Jo Navbar ya Page par dikhta hai) */}
+  
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="rounded-xl gap-2 border-border shadow-sm hover:bg-muted transition-all">
           <UserPlus className="w-4 h-4" /> 
@@ -79,7 +76,7 @@ export function AddUserModal() {
           </DialogHeader>
 
           <div className="grid gap-5 py-6">
-            {/* Full Name Field */}
+            {/* full name */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <UserPlus className="w-3 h-3" /> Full Name
@@ -93,7 +90,7 @@ export function AddUserModal() {
               />
             </div>
 
-            {/* Email Field */}
+            {/* email input */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Mail className="w-3 h-3" /> Office Email
@@ -108,7 +105,7 @@ export function AddUserModal() {
               />
             </div>
 
-            {/* Role Selection Field */}
+            {/* Role selection  */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <ShieldCheck className="w-3 h-3" /> System Role
@@ -124,7 +121,7 @@ export function AddUserModal() {
               </select>
             </div>
 
-            {/* Temporary Password Field */}
+            {/* Temporary password */}
             <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Lock className="w-3 h-3" /> Temporary Password

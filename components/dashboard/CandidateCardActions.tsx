@@ -17,13 +17,13 @@ export function CandidateCardActions({ candidateId }: { candidateId: string }) {
 
   useEffect(() => { setMounted(true) }, [])
 
-  //  ARCHIVE HANDLER 
+  
   const handleArchive = async () => {
     setLoading(true)
     const res = await toggleUserStatusAction(candidateId);
     if (res.success) {
       alert(res.message);
-      window.location.reload(); // UI update karne ke liye
+      window.location.reload(); 
     } else {
       alert("Failed to archive candidate.");
     }
@@ -41,7 +41,7 @@ export function CandidateCardActions({ candidateId }: { candidateId: string }) {
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="end" className="w-52 rounded-2xl p-1.5 shadow-xl border-border/50 bg-card">
-        {/* DOWNLOAD CV HATA DIYA (Kyunki candidate page par iski zarorat ni) */}
+        
         
         <DropdownMenuItem 
           onClick={handleArchive}

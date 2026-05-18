@@ -21,14 +21,13 @@ interface AuthPayload {
 
 
 
-// Environment Variable Safety
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
 if (!secretKey) {
   throw new Error("ACCESS_TOKEN_SECRET is not defined in .env file!");
 }
 const JWT_SECRET = new TextEncoder().encode(secretKey);
 
-//  PRIVATE HELPER: Token Verification
+
 
 async function verifyToken() {
   const cookieStore = await cookies()
@@ -43,7 +42,7 @@ async function verifyToken() {
   }
 }
 
-// 1. GET MY JOBS (For HR Jobs Page)
+// Hr jobe page
 
 export async function getMyJobsAction() {
   await connection()
@@ -66,7 +65,7 @@ export async function getMyJobsAction() {
   }
 }
 
-// 2. DELETE JOB ACTION
+// delete job 
 
 export async function deleteJobAction(jobId: string) {
   await connection()
@@ -91,7 +90,7 @@ export async function deleteJobAction(jobId: string) {
   }
 }
 
-// 3. CREATE JOB ACTION
+// create job
 
 export async function createJobAction(jobData: CreateJobInput) {
   await connection()
@@ -132,7 +131,7 @@ if (admin) {
   }
 }
 
-// 4. UPDATE JOB ACTION
+// update job
 
 export async function updateJobAction(jobId: string, updates: UpdateJobInput) {
   await connection()
@@ -163,18 +162,16 @@ export async function updateJobAction(jobId: string, updates: UpdateJobInput) {
   }
 }
 
-// 5. GET ALL ACTIVE JOBS (The New Chunk for Candidates)
+// get all active jobs 
 
 export async function getAllActiveJobsAction() {
-  // Iske liye login zaroori nahi hai (Public Explore) 
   await connection()
 
   try {
     await connectDB()
     
-    // Logic: Sirf 'active' jobs uthao poore platform se
     const jobs = await Job.find({ status: "active" })
-      .populate("postedBy", "name email") // Taake company/recruiter ka naam nazar aaye
+      .populate("postedBy", "name email")
       .sort({ createdAt: -1 })
       .lean()
 
@@ -191,7 +188,7 @@ export async function getAllActiveJobsAction() {
 
 
 
-// 6. GET ALL PLATFORM JOBS (For Admin Platform View) 
+// get all platform jobs 
 
 export async function getAllPlatformJobsAction() {
   await connection();
@@ -199,14 +196,11 @@ export async function getAllPlatformJobsAction() {
     await connectDB();
     const { payload, error } = await verifyToken();
     
-    // SECURITY: Sirf Admin poore platform ka mal dekh sakta hai 
     if (error || !payload || payload.role !== "admin") {
       return { success: false, code: "FORBIDDEN" };
     }
-
-    // ASLI LOGIC: Saari jobs laao (Active, Draft, Closed)
     const jobs = await Job.find({})
-      .populate("postedBy", "name email avatar") // Taake pata chale kis HR ne post ki 
+      .populate("postedBy", "name email avatar") 
       .sort({ createdAt: -1 })
       .lean();
 
@@ -221,7 +215,7 @@ export async function getAllPlatformJobsAction() {
 }
 
 
-// DELETE JOB ACTION (Admin)
+// delete job action admin
 
 
 export async function adminDeleteJobAction(jobId: string, reason: string) {
@@ -230,28 +224,25 @@ export async function adminDeleteJobAction(jobId: string, reason: string) {
     await connectDB();
     const { payload, error } = await verifyToken();
     
-    // 1. SECURITY: Sirf Admin hi doosron ki jobs delete kar sakta hai 
     if (error || !payload || payload.role !== "admin") {
       return { success: false, message: "Forbidden" };
     }
-
-    // 2. Identify the Job and Owner before deleting 
     const job = await Job.findById(jobId);
     if (!job) return { success: false, message: "Job not found" };
 
     const hrId = job.postedBy.toString();
     const jobTitle = job.title;
 
-    // 3. DELETE THE JOB 
+    // admin delete job 
     await Job.findByIdAndDelete(jobId);
 
-    //  4. ASLI MAGIC: HR ko wajah (Reason) ke saath notify karo 
+   
     await createNotification({
       recipient: hrId,
       sender: payload._id as string,
       message: `Your job "${jobTitle}" was removed by Admin. Reason: ${reason}`,
       link: "/hr/jobs",
-      type: "alert" // Red icon for warning 
+      type: "alert" 
     });
 
     revalidatePath("/admin/jobs");

@@ -12,7 +12,7 @@ export function ScheduleModal({ candidateId, jobId, candidateName, jobTitle }: a
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // 1. Form State 
+   
   const [formData, setFormData] = useState({
     interviewDate: "",
     startTime: "",
@@ -22,16 +22,16 @@ export function ScheduleModal({ candidateId, jobId, candidateName, jobTitle }: a
     notes: ""
   })
 
-  // 2. Submit Logic 
+   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
-    // Data package tayaar karo
     const finalData = {
       ...formData,
-      candidateId,
-      jobId
+      candidateId:candidateId as string,
+      jobId:jobId as string,
+      type:formData.type as "onsite"|"remote",
+      
     }
 
     const response = await createInterviewAction(finalData)

@@ -20,11 +20,10 @@ import {
 } from "lucide-react"
 
 interface JobDetailProps {
-  job: any; // Database se aane wala asli job object
+  job: any; 
 }
 
 export function JobDetailModal({ job }: JobDetailProps) {
-  // Status Colors Logic 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active": return "bg-green-100 text-green-700";
@@ -35,7 +34,7 @@ export function JobDetailModal({ job }: JobDetailProps) {
 
   return (
     <Dialog>
-      {/* 1. TRIGGER: The Professional Eye Icon  */}
+    
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/5 hover:text-primary transition-all">
           <Eye className="w-4 h-4" />
@@ -43,7 +42,7 @@ export function JobDetailModal({ job }: JobDetailProps) {
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
-        {/* Header Section with Background Accent */}
+         
         <div className="bg-primary/5 p-8 border-b border-border/50">
           <div className="flex justify-between items-start mb-4">
             <Badge variant="outline" className="rounded-lg border-primary/20 text-primary uppercase text-[10px] tracking-[0.2em] font-bold px-3">
@@ -64,10 +63,9 @@ export function JobDetailModal({ job }: JobDetailProps) {
           </DialogHeader>
         </div>
 
-        {/* Content Section */}
+         
         <div className="p-8 space-y-8">
           
-          {/* META GRID: Key Info Boxes  */}
           <div className="grid grid-cols-2 gap-4">
              <div className="p-4 rounded-2xl bg-muted/40 border border-border/50 space-y-1">
                 <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest flex items-center gap-1.5">
@@ -85,7 +83,7 @@ export function JobDetailModal({ job }: JobDetailProps) {
              </div>
           </div>
 
-          {/* DESCRIPTION SECTION  */}
+        
           <div className="space-y-3">
             <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
                <Layers className="w-4 h-4" /> Role Description
@@ -95,7 +93,7 @@ export function JobDetailModal({ job }: JobDetailProps) {
             </div>
           </div>
 
-          {/* SKILLS SECTION: Mapping the Array  */}
+         
           <div className="space-y-3">
             <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
                <CheckCircle2 className="w-4 h-4" /> Required Expertise
@@ -119,7 +117,7 @@ export function JobDetailModal({ job }: JobDetailProps) {
 
         </div>
 
-        {/* Footer info */}
+        
         <div className="px-8 py-4 bg-muted/30 border-t border-border/50 flex justify-between items-center">
            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
               Post ID: {job._id?.toString().substring(0, 8)}...

@@ -9,14 +9,14 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { connection } from "next/server";
 
-//  Environment Safety Check 
+
 const secretKey = process.env.ACCESS_TOKEN_SECRET;
 if (!secretKey) {
   throw new Error("ACCESS_TOKEN_SECRET is not defined in .env file!");
 }
 const JWT_SECRET = new TextEncoder().encode(secretKey);
 
-//  PRIVATE HELPER: Token Verification
+
 
 async function verifyToken() {
   const cookieStore = await cookies();
@@ -32,7 +32,7 @@ async function verifyToken() {
   }
 }
 
-// 1. GET DASHBOARD STATS (Universal - HR/Admin/Candidate)  
+ 
 
 export async function getDashboardStatsAction() {
   await connection();
@@ -45,7 +45,7 @@ export async function getDashboardStatsAction() {
     const userId = payload._id as string;
     const role = payload.role as string;
 
-    // --- Admin Logic ---
+   
     if (role === "admin") {
       const [totalUsers, totalJobs, totalApplications] = await Promise.all([
         User.countDocuments(),
@@ -55,7 +55,7 @@ export async function getDashboardStatsAction() {
       return { success: true, stats: { totalUsers, totalJobs, totalApplications } };
     }
 
-    // --- HR Logic ---
+    
     if (role === "hr") {
       const [totalJobs, totalInterviews, myJobIds] = await Promise.all([
         Job.countDocuments({ postedBy: userId }),
@@ -101,7 +101,7 @@ export async function getDashboardStatsAction() {
       };
     }
 
-    // --- Candidate Logic ---
+    
     if (role === "candidate") {
       const [totalApplied, shortlisted, pending, rejected] = await Promise.all([
         Application.countDocuments({ candidate: userId }),
@@ -120,7 +120,7 @@ export async function getDashboardStatsAction() {
   }
 }
 
-// 2. GET ADMIN ANALYTICS (Deep Platform Insights)  
+ 
 
 export async function getAdminAnalyticsAction() {
   await connection();
@@ -132,7 +132,7 @@ export async function getAdminAnalyticsAction() {
       return { success: false, code: "FORBIDDEN" };
     }
 
-    //  Parallel Aggregation: Growth + Distribution
+  
     const [userGrowth, jobGrowth, userDistribution] = await Promise.all([
       User.aggregate([
         { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } },
@@ -149,7 +149,6 @@ export async function getAdminAnalyticsAction() {
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    // Formatting monthly data (filling gaps with 0)
     const growthData = monthNames.map((name, index) => {
       const u = userGrowth.find(item => item._id === index + 1);
       const j = jobGrowth.find(item => item._id === index + 1);

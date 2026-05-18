@@ -71,7 +71,7 @@ export function Schedule() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Pending */}
+         
         <div>
           <button
             onClick={() => setPendingOpen(!pendingOpen)}
@@ -127,7 +127,7 @@ export function Schedule() {
           )}
         </div>
 
-        {/* Completed */}
+        
         <div>
           <button
             onClick={() => setCompletedOpen(!completedOpen)}
