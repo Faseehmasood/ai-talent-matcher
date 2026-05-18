@@ -254,3 +254,22 @@ export async function adminDeleteJobAction(jobId: string, reason: string) {
     return { success: false, message: "Server Error" };
   }
 }
+
+
+
+export async function getPublicJobsAction() {
+  try {
+    await connectDB()
+    const jobs = await Job.find({ status: "active" })
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .lean()
+
+    return {
+      success: true,
+      jobs: JSON.parse(JSON.stringify(jobs))
+    }
+  } catch (error) {
+    return { success: false, jobs: [] }
+  }
+}
