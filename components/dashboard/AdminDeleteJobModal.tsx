@@ -41,7 +41,7 @@ export function AdminDeleteJobModal({ job }: { job: any }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[450px] rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-450px rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
         <div className="bg-red-50 p-8 flex flex-col items-center text-center border-b border-red-100">
           <div className="w-16 h-16 bg-red-100 rounded-3xl flex items-center justify-center mb-4 text-red-600 shadow-inner">
             <AlertOctagon className="w-8 h-8" />
@@ -75,7 +75,7 @@ export function AdminDeleteJobModal({ job }: { job: any }) {
               onClick={handleDelete}
               className="rounded-xl font-black h-12 gap-2 shadow-lg shadow-red-500/20"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete Listing"}
+              {loading ? <Loader2 className="w-5 h-4 animate-spin" /> : "Delete Listing"}
             </Button>
           </div>
         </div>
