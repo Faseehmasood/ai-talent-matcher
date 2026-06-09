@@ -8,7 +8,7 @@ export const verifyJWT = async (req: NextRequest) => {
       req.cookies.get("accessToken")?.value ||
       req.headers.get("authorization")?.replace("Bearer ", "")
 
-    console.log("Token:", token) // Debug ke liye
+    console.log("Token:", token)
 
     if (!token) {
       throw new ApiError(401, "Unauthorized - No token provided")
@@ -23,7 +23,7 @@ export const verifyJWT = async (req: NextRequest) => {
       role: string
     }
 
-    console.log("Decoded:", decodedToken) // Debug ke liye
+    console.log("Decoded:", decodedToken)
 
     return decodedToken
 
