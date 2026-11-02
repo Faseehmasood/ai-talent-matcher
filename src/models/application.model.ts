@@ -7,6 +7,10 @@ export interface IApplication extends Document {
   coverLetter?: string
   status: "pending" | "reviewing" | "shortlisted" | "rejected" | "hired"
   matchScore?: number
+  resumeHash?: string
+  extractedGithubUsername?: string
+  extractedLinks?: string[]
+  ocrUsed?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -40,6 +44,22 @@ const applicationSchema = new Schema<IApplication>(
       type: Number,
       min: 0,
       max: 100,
+    },
+    resumeHash: {
+      type: String,
+      index: true,
+    },
+    extractedGithubUsername: {
+      type: String,
+      default: "",
+    },
+    extractedLinks: {
+      type: [String],
+      default: [],
+    },
+    ocrUsed: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -4,6 +4,7 @@ import connectDB from "@/src/lib/db"
 import { Job } from "@/src/models/job.model"
 import { Application } from "@/src/models/application.model"
 import { Interview } from "@/src/models/interview.model"
+import { ResumeChunk } from "@/src/models/resume-chunk.model"
 import { User } from "@/src/models/users.model"
 import { connection } from "next/server"
 import { revalidatePath } from "next/cache"
@@ -58,10 +59,11 @@ export async function deleteJobAction(jobId: string) {
       return { success: false, code: "NOT_FOUND" }
     }
 
-    // Cascade delete associated applications and interviews to prevent null-reference UI crashes
+    // Cascade delete associated applications, interviews, and vector resume chunks
     await Promise.all([
       Application.deleteMany({ job: jobId }),
       Interview.deleteMany({ job: jobId }),
+      ResumeChunk.deleteMany({ jobId }),
     ])
 
     revalidatePath("/hr/jobs")
@@ -251,6 +253,7 @@ export async function adminDeleteJobAction(jobId: string, reason: string) {
       Job.findByIdAndDelete(jobId),
       Application.deleteMany({ job: jobId }),
       Interview.deleteMany({ job: jobId }),
+      ResumeChunk.deleteMany({ jobId }),
     ])
 
     await createNotification({

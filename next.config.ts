@@ -1,10 +1,10 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["pdfjs-dist"],
   async headers() {
     return [
       {
-      
         source: "/api/:path*",
         headers: [
           {
@@ -25,8 +25,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-    ];
+    ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

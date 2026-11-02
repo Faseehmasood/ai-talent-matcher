@@ -3,13 +3,15 @@
 import connectDB from "@/src/lib/db"
 import { User } from "@/src/models/users.model"
 import { Application } from "@/src/models/application.model"
+import { ResumeChunk } from "@/src/models/resume-chunk.model"
 import { connection } from "next/server"
 import { verifySession } from "@/src/lib/auth-server"
-import { escapeRegex } from "@/src/lib/validations"
+import { hybridCandidateSearch } from "@/src/services/hybrid-search.service"
 
 export async function getAllCandidatesAction(
   searchQuery: string = "",
-  fetchArchived: boolean = false
+  fetchArchived: boolean = false,
+  jobId?: string
 ) {
   await connection()
 
@@ -21,29 +23,112 @@ export async function getAllCandidatesAction(
 
     await connectDB()
 
-    const queryFilter: Record<string, unknown> = {
+    const trimmedQuery = searchQuery.trim()
+
+    // 1. If HR entered a search query, execute Hybrid RAG ($vectorSearch + BM25 + RRF k=60)
+    if (trimmedQuery) {
+      const hybridResult = await hybridCandidateSearch({
+        query: trimmedQuery,
+        jobId,
+        fetchArchived,
+        limit: 60,
+      })
+
+      if (hybridResult.orderedCandidateIds.length === 0) {
+        return {
+          success: true,
+          candidates: [],
+          searchMode: hybridResult.searchMode,
+        }
+      }
+
+      const users = await User.find({
+        _id: { $in: hybridResult.orderedCandidateIds },
+        role: "candidate",
+        isActive: fetchArchived ? false : true,
+      })
+        .select("-password -refreshToken")
+        .lean()
+
+      const userById = new Map(users.map((u) => [u._id.toString(), u]))
+
+      const enrichedCandidates = hybridResult.orderedCandidateIds
+        .map((cid) => {
+          const userDoc = userById.get(cid)
+          if (!userDoc) return null
+          const ragMatch = hybridResult.matches.get(cid)
+          return {
+            ...userDoc,
+            _id: userDoc._id.toString(),
+            extractedGithubUsername: ragMatch?.extractedGithubUsername || "",
+            ragMatch: ragMatch
+              ? {
+                  semanticSimilarityPercent: ragMatch.semanticSimilarityPercent,
+                  rrfScore: ragMatch.rrfScore,
+                  matchedSection: ragMatch.matchedSection,
+                  matchedSnippet: ragMatch.matchedSnippet,
+                  matchedKeywords: ragMatch.matchedKeywords,
+                }
+              : null,
+          }
+        })
+        .filter(Boolean)
+
+      return {
+        success: true,
+        candidates: JSON.parse(JSON.stringify(enrichedCandidates)),
+        searchMode: hybridResult.searchMode,
+      }
+    }
+
+    // 2. Default pipeline view (no active search query): list active/archived candidates + resume metadata
+    const candidates = await User.find({
       role: "candidate",
       isActive: fetchArchived ? false : true,
-    }
-
-    const trimmedQuery = searchQuery.trim()
-    if (trimmedQuery) {
-      const safePattern = escapeRegex(trimmedQuery)
-      queryFilter.$or = [
-        { name: { $regex: safePattern, $options: "i" } },
-        { skills: { $regex: safePattern, $options: "i" } },
-      ]
-    }
-
-    const candidates = await User.find(queryFilter)
+    })
       .select("-password -refreshToken")
       .sort({ createdAt: -1 })
       .limit(100)
       .lean()
 
+    const candidateIds = candidates.map((c) => c._id)
+    const chunkMeta = await ResumeChunk.aggregate([
+      { $match: { candidateId: { $in: candidateIds } } },
+      {
+        $group: {
+          _id: "$candidateId",
+          chunkCount: { $sum: 1 },
+          githubUsername: { $first: "$extractedGithubUsername" },
+        },
+      },
+    ]).catch(() => [])
+
+    const metaMap = new Map<
+      string,
+      { chunkCount: number; githubUsername?: string }
+    >()
+    for (const item of chunkMeta) {
+      metaMap.set(item._id.toString(), {
+        chunkCount: item.chunkCount || 0,
+        githubUsername: item.githubUsername || "",
+      })
+    }
+
+    const enrichedDefault = candidates.map((c) => {
+      const meta = metaMap.get(c._id.toString())
+      return {
+        ...c,
+        _id: c._id.toString(),
+        resumeChunksIndexed: meta?.chunkCount || 0,
+        extractedGithubUsername: meta?.githubUsername || "",
+        ragMatch: null,
+      }
+    })
+
     return {
       success: true,
-      candidates: JSON.parse(JSON.stringify(candidates)),
+      candidates: JSON.parse(JSON.stringify(enrichedDefault)),
+      searchMode: "default",
     }
   } catch {
     return { success: false, code: "SERVER_ERROR" }
@@ -63,7 +148,10 @@ export async function getMyApplicationsAction() {
     const applications = await Application.find({
       candidate: session.user._id,
     })
-      .populate("job", "title company location salary jobType status skills description createdAt")
+      .populate(
+        "job",
+        "title company location salary jobType status skills description createdAt"
+      )
       .sort({ createdAt: -1 })
       .limit(100)
       .lean()
