@@ -44,7 +44,7 @@ export const aiEvaluationWorker = new Worker<AIEvaluationJobData>(
     }
   },
   {
-    connection: workerConnection as any,
+    connection: workerConnection,
     concurrency: 5,
     lockDuration: 90000,
   }
