@@ -34,7 +34,7 @@ export function getAIEvaluationQueue(): Queue<AIEvaluationJobData> | null {
 
   try {
     const queue = new Queue<AIEvaluationJobData>(AI_EVALUATION_QUEUE_NAME, {
-      connection: redisClient,
+      connection: redisClient as any,
       defaultJobOptions: {
         attempts: 3,
         backoff: {
