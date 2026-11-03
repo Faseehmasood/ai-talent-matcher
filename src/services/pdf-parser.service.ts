@@ -6,6 +6,7 @@ import {
   withRetryAndTimeout,
 } from "@/src/lib/gemini"
 import { ResumeSectionType } from "@/src/models/resume-chunk.model"
+import { extractGithubHandle } from "@/src/services/github-tool.service"
 
 export interface ParsedResumeChunk {
   sectionType: ResumeSectionType
@@ -30,33 +31,6 @@ interface PositionedTextItem {
   y: number
   width: number
 }
-
-const RESERVED_GITHUB_PATHS = new Set([
-  "features",
-  "pricing",
-  "enterprise",
-  "login",
-  "join",
-  "orgs",
-  "organizations",
-  "settings",
-  "about",
-  "topics",
-  "collections",
-  "explore",
-  "marketplace",
-  "sponsors",
-  "readme",
-  "security",
-  "customer-stories",
-  "team",
-  "Codespaces",
-  "copilot",
-  "pulls",
-  "issues",
-  "notifications",
-  "search",
-])
 
 const PROMPT_INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|prompts|rules)/gi,
@@ -135,48 +109,7 @@ export function extractGithubUsername(
   links: string[],
   rawText: string
 ): string {
-  const candidates: string[] = []
-
-  for (const link of links) {
-    const match = link.match(
-      /(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)(?:\/|\?|$)/i
-    )
-    if (match?.[1]) {
-      candidates.push(match[1])
-    }
-  }
-
-  const textUrlMatches = rawText.matchAll(
-    /(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)/gi
-  )
-  for (const match of textUrlMatches) {
-    if (match[1]) {
-      candidates.push(match[1])
-    }
-  }
-
-  const labelMatches = rawText.matchAll(
-    /\bgithub\s*(?:username|handle|id|profile)?\s*[:\-@]\s*@?([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)\b/gi
-  )
-  for (const match of labelMatches) {
-    if (match[1]) {
-      candidates.push(match[1])
-    }
-  }
-
-  for (const handle of candidates) {
-    const clean = handle.trim()
-    if (
-      clean.length >= 2 &&
-      clean.length <= 39 &&
-      !RESERVED_GITHUB_PATHS.has(clean.toLowerCase()) &&
-      !/\.(pdf|png|jpg|jpeg|html|js|ts|css|json)$/i.test(clean)
-    ) {
-      return clean
-    }
-  }
-
-  return ""
+  return extractGithubHandle(rawText, links) || ""
 }
 
 /**
@@ -438,7 +371,6 @@ export async function parseResumePdf(
     const loadingTask = pdfjs.getDocument({
       data: new Uint8Array(buffer),
       useSystemFonts: true,
-      isEvalSupported: false,
       disableFontFace: true,
     })
 

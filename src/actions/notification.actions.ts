@@ -4,6 +4,7 @@ import connectDB from "@/src/lib/db"
 import { Notification } from "@/src/models/notification.model"
 import { connection } from "next/server"
 import { verifySession } from "@/src/lib/auth-server"
+import { publishUserEvent } from "@/src/lib/sse-bus"
 
 export async function createNotification(data: {
   recipient: string
@@ -14,7 +15,25 @@ export async function createNotification(data: {
 }) {
   try {
     await connectDB()
-    await Notification.create(data)
+    const created = await Notification.create(data)
+    const unreadCount = await Notification.countDocuments({
+      recipient: data.recipient,
+      isRead: false,
+    })
+
+    await publishUserEvent(data.recipient, {
+      type: "NOTIFICATION_CREATED",
+      payload: {
+        unreadCount,
+        notification: {
+          _id: created._id.toString(),
+          message: created.message,
+          type: created.type || "info",
+          link: created.link || "/hr/applications",
+          createdAt: created.createdAt.toISOString(),
+        },
+      },
+    })
   } catch {
     // Non-fatal notification persistence error
   }
