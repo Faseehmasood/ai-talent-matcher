@@ -27,6 +27,22 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: "/hr/login",
+        destination: "/hr-login",
+      },
+      {
+        source: "/employers/login",
+        destination: "/hr-login",
+      },
+      {
+        source: "/candidate/login",
+        destination: "/login",
+      },
+    ]
+  },
 }
 
 export default nextConfig

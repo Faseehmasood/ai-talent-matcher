@@ -154,6 +154,19 @@ export default function LoginPage() {
           </Link>
         </p>
 
+        {/* Recruiter Switch Banner */}
+        <div className="pt-2 border-t border-border/80">
+          <div className="p-3.5 rounded-2xl bg-muted/60 border border-border flex items-center justify-between gap-3 text-xs">
+            <div className="space-y-0.5">
+              <span className="font-bold text-foreground block">Hiring for your company?</span>
+              <span className="text-muted-foreground text-[11px] block">Use the dedicated AI Recruiter Console</span>
+            </div>
+            <Button asChild size="sm" variant="outline" className="rounded-xl font-bold shrink-0 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground">
+              <Link href="/hr/login">HR Portal →</Link>
+            </Button>
+          </div>
+        </div>
+
       </motion.div>
     </div>
   )

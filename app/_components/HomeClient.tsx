@@ -35,9 +35,14 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
                 </div>
                 <span className="font-bold text-xl tracking-tighter">TalentaSync</span>
               </div>
-              <Button asChild className="rounded-xl font-bold px-6 shadow-xl shadow-primary/20">
-                <Link href="/login">Login</Link>
-              </Button>
+              <div className="flex items-center gap-2.5">
+                <Button asChild variant="ghost" className="rounded-xl font-semibold px-4 hover:bg-muted text-sm">
+                  <Link href="/login">Candidate Login</Link>
+                </Button>
+                <Button asChild className="rounded-xl font-bold px-5 bg-gradient-to-r from-indigo-600 to-primary text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all text-sm">
+                  <Link href="/hr/login">For Employers / HR →</Link>
+                </Button>
+              </div>
             </div>
           </nav>
 
@@ -54,8 +59,16 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
                 <span className="text-primary">hire and get hired.</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                TalentaSync connects top companies with world-class talent through a seamless, automated, and beautiful experience.
+                TalentaSync connects top companies with world-class talent through autonomous code verification, vector matching, and seamless candidate pipelines.
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <Button asChild size="lg" className="rounded-2xl font-bold px-8 shadow-xl shadow-primary/20">
+                  <Link href="/login">Explore Jobs as Candidate</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-2xl font-bold px-8 border-border hover:bg-muted">
+                  <Link href="/hr/login">Recruiter Portal →</Link>
+                </Button>
+              </div>
               {/* <div className="max-w-2xl mx-auto relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input

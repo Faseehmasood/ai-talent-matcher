@@ -178,3 +178,102 @@ export async function loginUserAction(formData: LoginInput) {
     return { success: false, message: "Something went wrong on the server" }
   }
 }
+
+export async function loginHRAction(formData: LoginInput) {
+  try {
+    const result = loginSchema.safeParse(formData)
+    if (!result.success) {
+      return { success: false, message: result.error.issues[0].message }
+    }
+
+    const { email, password } = result.data
+    const normalizedEmail = email.toLowerCase()
+
+    try {
+      await authRateLimiter.consume(`login:${normalizedEmail}`)
+    } catch {
+      return {
+        success: false,
+        message: "Too many login attempts. Please try again in 60 seconds.",
+      }
+    }
+
+    await connectDB()
+    const user = await User.findOne({ email: normalizedEmail })
+
+    if (!user) {
+      return { success: false, message: "Invalid email or password!" }
+    }
+
+    if (user.isActive === false) {
+      return {
+        success: false,
+        message:
+          "Your account has been suspended. Please contact an administrator.",
+      }
+    }
+
+    // Strict Role Enforcement: Only HR and Admin roles are permitted in the Recruiter Portal
+    if (user.role !== "hr" && user.role !== "admin") {
+      return {
+        success: false,
+        message:
+          "Access Denied: This portal is strictly for HR Managers and Technical Recruiters. Please sign in via the Candidate Portal.",
+      }
+    }
+
+    const isMatch = await user.comparePassword(password)
+    if (!isMatch) {
+      return { success: false, message: "Invalid email or password!" }
+    }
+
+    const { accessToken, refreshToken } = await signAccessAndRefreshTokens({
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    })
+
+    user.refreshToken = refreshToken
+    await user.save({ validateBeforeSave: false })
+
+    const cookieStore = await cookies()
+    const isProd = process.env.NODE_ENV === "production"
+
+    cookieStore.set("accessToken", accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "lax",
+      maxAge: 15 * 60,
+      path: "/",
+    })
+
+    cookieStore.set("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
+    })
+
+    return {
+      success: true,
+      message: "HR authentication successful!",
+      user: {
+        _id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar || "",
+        bio: user.bio || "",
+        phoneNumber: user.phoneNumber || "",
+        skills: user.skills || [],
+        isGoogleUser: Boolean(user.isGoogleUser),
+      },
+    }
+  } catch (err) {
+    console.error("loginHRAction error:", err)
+    return { success: false, message: "Something went wrong on the server" }
+  }
+}
+

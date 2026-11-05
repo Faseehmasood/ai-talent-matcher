@@ -12,7 +12,15 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
-  if (pathname === "/login" || pathname === "/register") {
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/hr/login" ||
+    pathname === "/hr-login" ||
+    pathname === "/employers/login" ||
+    pathname === "/candidate/login"
+
+  if (isAuthRoute) {
     if (accessToken) {
       try {
         const { payload } = await jwtVerify(accessToken, JWT_SECRET)
@@ -30,14 +38,17 @@ export async function proxy(req: NextRequest) {
   }
 
   const isProtectedPath =
-    pathname.startsWith("/hr") ||
+    (pathname.startsWith("/hr") &&
+      pathname !== "/hr/login" &&
+      pathname !== "/hr-login") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/candidate") ||
+    (pathname.startsWith("/candidate") && pathname !== "/candidate/login") ||
     pathname === "/select-role"
 
   if (isProtectedPath) {
     if (!accessToken && !refreshToken) {
-      return NextResponse.redirect(new URL("/login", req.url))
+      const redirectTarget = pathname.startsWith("/hr") ? "/hr/login" : "/login"
+      return NextResponse.redirect(new URL(redirectTarget, req.url))
     }
 
     if (!accessToken && refreshToken) {
