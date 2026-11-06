@@ -142,6 +142,19 @@ function pruneCacheIfNeeded(cache: Map<string, EtagCacheEntry>): void {
 }
 
 /**
+ * Normalizes any raw GitHub username, handle, or full URL (e.g. "https://github.com/username")
+ * down to just the canonical username string.
+ */
+export function cleanGithubUsername(raw: string | null | undefined): string {
+  if (!raw) return ""
+  let cleaned = raw.trim()
+  cleaned = cleaned.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, "")
+  cleaned = cleaned.replace(/^[@/]+/, "")
+  cleaned = cleaned.replace(/[\/?#].*$/, "")
+  return cleaned.trim().replace(/^-+|-+$/g, "")
+}
+
+/**
  * Deterministically extracts a candidate's GitHub handle from visible PDF text
  * and extracted PDF /Annots /URI hyperlink annotations.
  */
@@ -332,7 +345,7 @@ async function githubApiGet<T>(url: string): Promise<{
 export async function getGithubUserProfile(
   username: string
 ): Promise<GithubUserProfile> {
-  const cleanUser = username.trim().replace(/^@/, "")
+  const cleanUser = cleanGithubUsername(username)
   const encodedUser = encodeURIComponent(cleanUser)
   const res = await githubApiGet<Record<string, unknown>>(
     `https://api.github.com/users/${encodedUser}`
@@ -385,7 +398,7 @@ export async function getGithubUserProfile(
 export async function getAuthoredRepositories(
   username: string
 ): Promise<GithubAuthoredReposResult> {
-  const cleanUser = username.trim().replace(/^@/, "")
+  const cleanUser = cleanGithubUsername(username)
   const encodedUser = encodeURIComponent(cleanUser)
   const res = await githubApiGet<Array<Record<string, unknown>>>(
     `https://api.github.com/users/${encodedUser}/repos?sort=pushed&direction=desc&per_page=30&type=owner`
@@ -520,7 +533,7 @@ export async function inspectRepoDependencies(
   owner: string,
   repo: string
 ): Promise<RepoDependencyInspectionResult> {
-  const cleanOwner = owner.trim().replace(/^@/, "")
+  const cleanOwner = cleanGithubUsername(owner)
   const cleanRepo = repo.trim()
   const encodedOwner = encodeURIComponent(cleanOwner)
   const encodedRepo = encodeURIComponent(cleanRepo)

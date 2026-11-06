@@ -14,6 +14,7 @@ import { enqueueApplicationAIPipeline } from "@/src/queues/ai-evaluation.queue"
 import { runApplicationAIPipeline } from "@/src/services/ai-pipeline.orchestrator"
 import { publishUserEvent } from "@/src/lib/sse-bus"
 import { AIProcessingState } from "@/types"
+import { cleanGithubUsername } from "@/src/services/github-tool.service"
 
 const VALID_APPLICATION_STATUSES = [
   "pending",
@@ -227,10 +228,9 @@ export async function retriggerAIAnalysisAction(
     }
 
     application.aiProcessing = queuedProcessing
-    if (manualGithubHandle?.trim()) {
-      application.extractedGithubUsername = manualGithubHandle
-        .trim()
-        .replace(/^@/, "")
+    const cleanHandle = cleanGithubUsername(manualGithubHandle)
+    if (cleanHandle) {
+      application.extractedGithubUsername = cleanHandle
     }
     await application.save()
 
@@ -248,7 +248,7 @@ export async function retriggerAIAnalysisAction(
 
     const dispatch = await enqueueApplicationAIPipeline(applicationId, {
       forceRefresh: true,
-      manualGithubHandle: manualGithubHandle?.trim() || undefined,
+      manualGithubHandle: cleanHandle || undefined,
     })
 
     return {
@@ -306,9 +306,10 @@ export async function verifyCandidateGithubAction(
       }
     }
 
+    const cleanHandle = cleanGithubUsername(manualGithubHandle)
     const result = await runApplicationAIPipeline(applicationId, {
       forceRefresh: forceRefreshEval,
-      manualGithubHandle: manualGithubHandle?.trim() || undefined,
+      manualGithubHandle: cleanHandle || undefined,
     })
 
     revalidatePath("/hr/applications")

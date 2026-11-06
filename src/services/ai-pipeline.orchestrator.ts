@@ -14,6 +14,7 @@ import {
   runGithubVerificationAgent,
   GithubVerificationReport,
 } from "@/src/services/github-verification.agent"
+import { cleanGithubUsername } from "@/src/services/github-tool.service"
 import {
   RUBRIC_VERSION,
   computeResumeHash,
@@ -348,9 +349,9 @@ export async function runApplicationAIPipeline(
     })
 
     const explicitHandle =
-      options.manualGithubHandle?.trim() ||
-      extractedGithubUsername ||
-      tier1Cached?.extractedGithubUsername ||
+      cleanGithubUsername(options.manualGithubHandle) ||
+      cleanGithubUsername(extractedGithubUsername) ||
+      cleanGithubUsername(tier1Cached?.extractedGithubUsername) ||
       null
 
     let githubReport: GithubVerificationReport | null =

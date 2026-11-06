@@ -38,6 +38,7 @@ import {
   updateApplicationStatusAction,
   verifyCandidateGithubAction,
 } from "@/src/actions/application.actions"
+import { cleanGithubUsername } from "@/lib/utils"
 
 const STAGE_LABELS: Record<string, string> = {
   QUEUED: "Queued (5%)",
@@ -96,7 +97,7 @@ export function ApplicationDetailModal({
       application.githubVerification?.githubUsername ||
       application.aiAnalysis?.githubReport?.githubUsername
     if (detectedUser && !manualHandle) {
-      setManualHandle(detectedUser)
+      setManualHandle(cleanGithubUsername(detectedUser))
     }
   }, [
     application.aiAnalysis,
@@ -121,16 +122,20 @@ export function ApplicationDetailModal({
   const handleRunGithubAudit = async (forceRefresh: boolean = true) => {
     if (!application.id) return
     setVerifyingGithub(true)
+    const cleanHandle = cleanGithubUsername(manualHandle)
+    if (cleanHandle) {
+      setManualHandle(cleanHandle)
+    }
     const res = await verifyCandidateGithubAction(
       application.id,
-      manualHandle.trim() || undefined,
+      cleanHandle || undefined,
       forceRefresh
     )
     if (res.success) {
       if (res.report) {
         setGithubReport(res.report)
         if (res.report.githubUsername) {
-          setManualHandle(res.report.githubUsername)
+          setManualHandle(cleanGithubUsername(res.report.githubUsername))
         }
       }
       if (res.aiAnalysis) {
@@ -200,10 +205,11 @@ export function ApplicationDetailModal({
       ? aiAnalysis.suggestedInterviewQuestions
       : githubReport?.targetedInterviewQuestions || []
 
-  const ghProfileHandle =
+  const ghProfileHandle = cleanGithubUsername(
     githubReport?.githubUsername ||
     application.extractedGithubUsername ||
-    manualHandle.trim()
+    manualHandle
+  )
 
   return (
     <Dialog>
@@ -542,15 +548,12 @@ export function ApplicationDetailModal({
                   </h4>
                   {ghProfileHandle && (
                     <a
-                      href={`https://github.com/${ghProfileHandle.replace(
-                        /^@/,
-                        ""
-                      )}`}
+                      href={`https://github.com/${ghProfileHandle}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
                     >
-                      @{ghProfileHandle.replace(/^@/, "")}{" "}
+                      @{ghProfileHandle}{" "}
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}

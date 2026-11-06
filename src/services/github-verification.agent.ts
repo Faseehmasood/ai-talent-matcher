@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/gemini"
 import {
   extractGithubHandle,
+  cleanGithubUsername,
   getGithubUserProfile,
   getAuthoredRepositories,
   inspectRepoDependencies,
@@ -360,8 +361,9 @@ export async function runGithubVerificationAgent(params: {
   jobTitle: string
   jobSkills: string[]
 }): Promise<GithubVerificationReport> {
+  const explicitClean = cleanGithubUsername(params.explicitGithubHandle)
   const handle =
-    params.explicitGithubHandle?.trim().replace(/^@/, "") ||
+    explicitClean ||
     extractGithubHandle(params.resumeText, params.extractedLinks || [])
 
   // Fast-path: If no GitHub handle exists anywhere in the resume or annotations, return neutral 70
