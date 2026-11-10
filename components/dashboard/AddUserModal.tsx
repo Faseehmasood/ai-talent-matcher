@@ -63,7 +63,7 @@ export function AddUserModal() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[450px] rounded-[2rem] border-border shadow-2xl bg-card">
+      <DialogContent className="sm:max-w-[450px] rounded-[2rem] border-border shadow-2xl bg-card max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-2 text-primary border border-primary/20">

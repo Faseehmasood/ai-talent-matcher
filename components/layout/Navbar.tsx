@@ -58,31 +58,32 @@ export function Navbar() {
     : "hr"
 
   return (
-    <header className="flex items-center justify-between px-6 py-3 border-b bg-background">
-      <div className="flex items-center gap-4">
+    <header className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b bg-background">
+      <div className="flex items-center gap-2 sm:gap-4">
         <SidebarTrigger />
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="rounded-full transition-all duration-200"
+          className="rounded-full transition-all duration-200 h-8 w-8 sm:h-9 sm:w-9"
         >
           {theme === "dark" ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
+            <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
           ) : (
-            <Moon className="w-5 h-5 text-slate-700" />
+            <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
           )}
         </Button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {role === "admin" && <AddUserModal />}
           {role === "candidate" && (
-            <Button asChild variant="outline" size="sm" className="gap-2 rounded-xl border-border shadow-sm">
+            <Button asChild variant="outline" size="sm" className="gap-1.5 sm:gap-2 rounded-xl border-border shadow-sm px-2.5 sm:px-3 text-xs sm:text-sm">
               <Link href="/candidate/jobs">
-                <Search className="w-4 h-4" /> Browse Jobs
+                <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
+                <span className="hidden sm:inline">Browse Jobs</span>
               </Link>
             </Button>
           )}

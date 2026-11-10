@@ -65,7 +65,7 @@ export function CreateJobModal() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] rounded-3xl">
+      <DialogContent className="sm:max-w-[600px] rounded-3xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Post a New Job</DialogTitle>
@@ -73,7 +73,7 @@ export function CreateJobModal() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label>Job Title</Label>
                 <Input required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="rounded-xl" />
@@ -84,7 +84,7 @@ export function CreateJobModal() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label>Location</Label>
                 <Input required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="rounded-xl" />
@@ -104,7 +104,7 @@ export function CreateJobModal() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label>Min Salary</Label>
                 <Input required type="number" value={formData.minSalary} onChange={(e) => setFormData({...formData, minSalary: e.target.value})} className="rounded-xl" />

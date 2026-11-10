@@ -53,24 +53,24 @@ export function ScheduleModal({ candidateId, jobId, candidateName, jobTitle }: a
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border shadow-2xl">
+      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border shadow-2xl max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-              <CalendarDays className="w-6 h-6 text-primary" /> Schedule Interview
+            <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /> Schedule Interview
             </DialogTitle>
             <DialogDescription className="font-medium text-xs">
               Booking meeting for <span className="text-foreground font-bold">{candidateName}</span> for the <span className="text-foreground font-bold">{jobTitle}</span> position.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-5 py-6">
+          <div className="grid gap-4 sm:gap-5 py-4 sm:py-6">
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Date</Label>
               <Input type="date" required value={formData.interviewDate} onChange={(e)=>setFormData({...formData, interviewDate: e.target.value})} className="rounded-xl h-11 border-border/60" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5"><Clock className="w-3 h-3" /> Start</Label>
                 <Input type="time" required value={formData.startTime} onChange={(e)=>setFormData({...formData, startTime: e.target.value})} className="rounded-xl h-11 border-border/60" />
@@ -81,7 +81,7 @@ export function ScheduleModal({ candidateId, jobId, candidateName, jobTitle }: a
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1.5">
                 <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Type</Label>
                 <select value={formData.type} onChange={(e)=>setFormData({...formData, type: e.target.value})} className="flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none">

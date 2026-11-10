@@ -28,37 +28,41 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
 
           {/* NAVBAR */}
           <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-9 h-9 bg-foreground rounded-xl flex items-center justify-center shadow-lg">
                   <span className="text-background font-black text-sm tracking-tighter">TS</span>
                 </div>
-                <span className="font-bold text-xl tracking-tighter">TalentaSync</span>
+                <span className="font-bold text-lg sm:text-xl tracking-tighter">TalentaSync</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Button asChild variant="ghost" className="rounded-xl font-semibold px-4 hover:bg-muted text-sm">
-                  <Link href="/login">Candidate Login</Link>
+              <div className="flex items-center gap-1.5 sm:gap-2.5">
+                <Button asChild variant="ghost" size="sm" className="rounded-xl font-semibold px-2.5 sm:px-4 hover:bg-muted text-xs sm:text-sm">
+                  <Link href="/login">
+                    <span className="hidden sm:inline">Candidate </span>Login
+                  </Link>
                 </Button>
-                <Button asChild className="rounded-xl font-bold px-5 bg-gradient-to-r from-indigo-600 to-primary text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all text-sm">
-                  <Link href="/hr/login">For Employers / HR →</Link>
+                <Button asChild size="sm" className="rounded-xl font-bold px-3 sm:px-5 bg-gradient-to-r from-indigo-600 to-primary text-white shadow-lg shadow-indigo-600/20 hover:opacity-95 transition-all text-xs sm:text-sm shrink-0">
+                  <Link href="/hr/login">
+                    <span className="hidden sm:inline">For Employers / </span>HR →
+                  </Link>
                 </Button>
               </div>
             </div>
           </nav>
 
           {/* HERO SECTION */}
-          <section className="relative pt-20 pb-32 px-6 overflow-hidden">
+          <section className="relative pt-16 sm:pt-20 pb-20 sm:pb-32 px-4 sm:px-6 overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-primary/5 blur-3xl rounded-full -z-10 opacity-50" />
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              <Badge variant="outline" className="px-4 py-1.5 rounded-full border-primary/20 text-primary bg-primary/5">
-                <Sparkles className="w-3 h-3 mr-2 fill-primary" />
+            <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
+              <Badge variant="outline" className="px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full border-primary/20 text-primary bg-primary/5 text-xs">
+                <Sparkles className="w-3 h-3 mr-1.5 sm:mr-2 fill-primary" />
                 AI-Driven Recruitment Platform
               </Badge>
-              <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-foreground">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight sm:leading-none text-foreground">
                 The smartest way to <br />
                 <span className="text-primary">hire and get hired.</span>
               </h1>
-              <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+              <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                 TalentaSync connects top companies with world-class talent through autonomous code verification, vector matching, and seamless candidate pipelines.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4 pt-2">

@@ -58,7 +58,7 @@ export default function RegisterPage() {
         initial={{ opacity: 0, scale: 0.92, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="bg-card border border-border rounded-[2.5rem] shadow-2xl w-full max-w-md p-8 space-y-6"
+        className="bg-card border border-border rounded-[2.5rem] shadow-2xl w-full max-w-md p-6 sm:p-8 space-y-6"
       >
         {/* Top Row — Logo + Close */}
         <div className="flex items-center justify-between">

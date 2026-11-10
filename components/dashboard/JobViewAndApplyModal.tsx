@@ -77,44 +77,44 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         {step === "view" ? (
           <div className="flex flex-col h-full">
             
-            <div className="bg-primary/5 p-8 border-b border-border/50">
-               <div className="flex items-center gap-4 mb-4">
-                  <div className="w-14 h-14 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-2xl border border-border shadow-sm">
+            <div className="bg-primary/5 p-5 sm:p-8 border-b border-border/50">
+               <div className="flex items-center gap-3 sm:gap-4 mb-2 sm:mb-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-xl sm:text-2xl border border-border shadow-sm">
                     {job.company?.substring(0, 1)}
                   </div>
                   <div>
-                    <DialogTitle className="text-2xl font-black tracking-tight">{job.title}</DialogTitle>
-                    <p className="text-muted-foreground font-semibold flex items-center gap-1.5">
-                      <Briefcase className="w-4 h-4" /> {job.company}
+                    <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight">{job.title}</DialogTitle>
+                    <p className="text-muted-foreground font-semibold flex items-center gap-1.5 text-xs sm:text-sm">
+                      <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {job.company}
                     </p>
                   </div>
                </div>
             </div>
 
-            <div className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="bg-muted/50 p-4 rounded-2xl space-y-1">
+            <div className="p-5 sm:p-8 space-y-5 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                 <div className="bg-muted/50 p-3.5 sm:p-4 rounded-2xl space-y-1">
                     <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Location</p>
                     <p className="text-sm font-bold flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> {job.location}</p>
                  </div>
-                 <div className="bg-muted/50 p-4 rounded-2xl space-y-1">
+                 <div className="bg-muted/50 p-3.5 sm:p-4 rounded-2xl space-y-1">
                     <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Est. Salary</p>
                     <p className="text-sm font-bold flex items-center gap-2"><DollarSign className="w-4 h-4 text-primary" /> {job.salary?.min} - {job.salary?.max}</p>
                  </div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-bold text-sm text-primary uppercase tracking-widest">About this role</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed bg-muted/20 p-4 rounded-2xl border border-border/40">
+                <h4 className="font-bold text-xs sm:text-sm text-primary uppercase tracking-widest">About this role</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed bg-muted/20 p-3.5 sm:p-4 rounded-2xl border border-border/40">
                   {job.description}
                 </p>
               </div>
 
-              <Button onClick={() => setStep("apply")} className="w-full h-12 rounded-2xl font-black text-md shadow-xl shadow-primary/20">
+              <Button onClick={() => setStep("apply")} className="w-full h-11 sm:h-12 rounded-2xl font-black text-sm sm:text-md shadow-xl shadow-primary/20">
                 Proceed to Apply
               </Button>
             </div>
@@ -122,16 +122,16 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col">
              
-            <div className="bg-primary/5 p-8 border-b border-border/50">
-               <DialogTitle className="text-2xl font-black tracking-tight">Submit Application</DialogTitle>
-               <DialogDescription className="font-medium">Applying for <span className="text-primary">{job.title}</span></DialogDescription>
+            <div className="bg-primary/5 p-5 sm:p-8 border-b border-border/50">
+               <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight">Submit Application</DialogTitle>
+               <DialogDescription className="font-medium text-xs sm:text-sm">Applying for <span className="text-primary">{job.title}</span></DialogDescription>
             </div>
 
-            <div className="p-8 space-y-6">
+            <div className="p-5 sm:p-8 space-y-5 sm:space-y-6">
                
               <div className="space-y-2">
                 <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Upload Resume (PDF)</Label>
-                <div className="relative border-2 border-dashed border-border rounded-[2rem] p-10 flex flex-col items-center justify-center bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group">
+                <div className="relative border-2 border-dashed border-border rounded-[2rem] p-6 sm:p-10 flex flex-col items-center justify-center bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group">
                   <input 
                     type="file" accept=".pdf" required 
                     className="absolute inset-0 opacity-0 cursor-pointer z-10"

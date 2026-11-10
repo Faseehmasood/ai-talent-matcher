@@ -225,17 +225,17 @@ export function ApplicationDetailModal({
 
       <DialogContent className="sm:max-w-[780px] rounded-[2.5rem] border-border shadow-2xl p-0 overflow-hidden">
         {/* Header Banner */}
-        <div className="bg-primary/5 p-7 border-b border-border/50">
+        <div className="bg-primary/5 p-4 sm:p-7 border-b border-border/50">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-xl border border-border shadow-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-background rounded-2xl flex items-center justify-center font-black text-primary text-lg sm:text-xl border border-border shadow-sm shrink-0">
                 {application.initials}
               </div>
               <div>
-                <DialogTitle className="text-2xl font-black tracking-tight">
+                <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight">
                   {application.name}
                 </DialogTitle>
-                <p className="text-sm text-muted-foreground font-medium">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium">
                   {application.role}
                 </p>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -314,7 +314,7 @@ export function ApplicationDetailModal({
         </div>
 
         {/* Main Scrollable Scorecard Body */}
-        <div className="p-7 space-y-6 max-h-[74vh] overflow-y-auto">
+        <div className="p-4 sm:p-7 space-y-5 sm:space-y-6 max-h-[74vh] overflow-y-auto">
           {/* Contact Details Row */}
           <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs">
             <span className="font-bold text-foreground">
@@ -559,19 +559,19 @@ export function ApplicationDetailModal({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                   <Input
                     value={manualHandle}
                     onChange={(e) => setManualHandle(e.target.value)}
                     placeholder="GitHub username (optional)"
-                    className="h-8 text-xs rounded-xl w-44 bg-background"
+                    className="h-8 text-xs rounded-xl w-full sm:w-44 bg-background"
                   />
                   <Button
                     type="button"
                     size="sm"
                     onClick={() => handleRunGithubAudit(true)}
                     disabled={verifyingGithub}
-                    className="h-8 rounded-xl text-xs font-bold gap-1.5"
+                    className="h-8 rounded-xl text-xs font-bold gap-1.5 w-full sm:w-auto justify-center"
                   >
                     {verifyingGithub ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />

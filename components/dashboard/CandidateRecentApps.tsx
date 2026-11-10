@@ -30,7 +30,7 @@ export function CandidateRecentApps({ applications = [] }: CandidateRecentAppsPr
       <CardHeader>
         <CardTitle className="text-lg font-bold">My Recent Applications</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-border">
