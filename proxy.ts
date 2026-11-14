@@ -62,18 +62,21 @@ export async function proxy(req: NextRequest) {
         const { payload } = await jwtVerify(accessToken, JWT_SECRET)
         const userRole = payload.role as string
 
+        const roleHome =
+          userRole === "admin"
+            ? "/admin/dashboard"
+            : userRole === "hr"
+            ? "/hr/dashboard"
+            : "/candidate/dashboard"
+
         if (pathname.startsWith("/admin") && userRole !== "admin") {
-          return NextResponse.redirect(
-            new URL("/candidate/dashboard", req.url)
-          )
+          return NextResponse.redirect(new URL(roleHome, req.url))
         }
         if (pathname.startsWith("/hr") && userRole !== "hr") {
-          return NextResponse.redirect(
-            new URL("/candidate/dashboard", req.url)
-          )
+          return NextResponse.redirect(new URL(roleHome, req.url))
         }
         if (pathname.startsWith("/candidate") && userRole !== "candidate") {
-          return NextResponse.redirect(new URL("/hr/dashboard", req.url))
+          return NextResponse.redirect(new URL(roleHome, req.url))
         }
 
         return NextResponse.next()

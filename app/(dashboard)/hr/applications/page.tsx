@@ -9,7 +9,7 @@ export default async function HRApplicationsPage() {
 
   if (!response.success) {
     if (response.code === "UNAUTHORIZED" || response.code === "TOKEN_EXPIRED") {
-      redirect("/login")
+      redirect("/hr/login")
     }
     throw new Error("Failed to load applications")
   }

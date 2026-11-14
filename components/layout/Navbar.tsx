@@ -43,19 +43,19 @@ export function Navbar() {
     }
   }, [user, setAuth])
 
-  const handleLogout = async () => {
-    const res = await logoutAction()
-    if (res.success) {
-      logout()
-      window.location.href = "/login"
-    }
-  }
-
   const role = pathname.startsWith("/admin")
     ? "admin"
     : pathname.startsWith("/candidate")
     ? "candidate"
     : "hr"
+
+  const handleLogout = async () => {
+    const res = await logoutAction()
+    if (res.success) {
+      logout()
+      window.location.href = role === "hr" ? "/hr/login" : "/login"
+    }
+  }
 
   return (
     <header className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b bg-background">

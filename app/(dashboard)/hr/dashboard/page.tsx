@@ -15,7 +15,7 @@ export default async function HRDashboardPage() {
   // 2. Security Barrier: Failure cases handle karo 
   if (!response.success) {
     if (response.code === "UNAUTHORIZED" || response.code === "TOKEN_EXPIRED") {
-      redirect("/login");
+      redirect("/hr/login");
     }
     // Kisi aur server error ke liye Next.js ka error.tsx trigger hoga
     throw new Error(response.code || "Failed to load dashboard data");

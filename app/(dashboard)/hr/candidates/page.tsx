@@ -30,7 +30,7 @@ export default async function HRCandidatesPage({
   const response = await getAllCandidatesAction(query);
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED") redirect("/login");
+    if (response.code === "UNAUTHORIZED") redirect("/hr/login");
     throw new Error("Failed to load candidates");
   }
 

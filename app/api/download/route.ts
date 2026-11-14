@@ -16,7 +16,16 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const fileUrl = searchParams.get("url")
+  let fileUrl = searchParams.get("url")
+  const appId = searchParams.get("id")
+
+  if (!fileUrl && appId) {
+    await connectDB()
+    const appDoc = await Application.findById(appId).select("resume").lean()
+    if (appDoc?.resume) {
+      fileUrl = appDoc.resume
+    }
+  }
 
   if (!fileUrl) {
     return NextResponse.json(

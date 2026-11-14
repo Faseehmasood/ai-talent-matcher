@@ -1,0 +1,79 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> /Annots [6 0 R] >>
+endobj
+4 0 obj
+<< /Length 2348 >>
+stream
+BT
+/F1 11 Tf
+50 760 Td
+14 TL
+(FASEEH MASOOD) Tj T*
+(Full-Stack Software Engineer | AI & Distributed Systems) Tj T*
+(Email: faseeh.masood@example.com | Phone: +92 300 1234567) Tj T*
+(GitHub: https://github.com/Faseehmasood) Tj T*
+(Portfolio: https://github.com/Faseehmasood/my-portfolio) Tj T*
+() Tj T*
+(SUMMARY) Tj T*
+(Full-Stack Software Engineer with 3+ years of hands-on experience architecting) Tj T*
+(production Next.js, TypeScript, Node.js, and MongoDB applications. Specialized) Tj T*
+(in autonomous AI agents, 768-d vector search \(RAG\), and scalable backend queues.) Tj T*
+() Tj T*
+(TECHNICAL SKILLS) Tj T*
+(Languages: TypeScript, JavaScript \(ES2024\), Python, SQL, HTML5, CSS3) Tj T*
+(Frontend: Next.js 16 \(App Router\), React 19, Tailwind CSS, Framer Motion, Zustand) Tj T*
+(Backend: Node.js, Express.js, REST APIs, Server-Sent Events \(SSE\), BullMQ, Redis) Tj T*
+(Databases: MongoDB Atlas, Vector Search \(HNSW\), PostgreSQL, Mongoose ODM) Tj T*
+(AI & Cloud: Google Gemini API \(gemini-2.5-flash, text-embedding-004\), Cloudinary, Docker) Tj T*
+() Tj T*
+(PROJECTS) Tj T*
+(1. AI Talent Matcher \(https://github.com/Faseehmasood/ai-talent-matcher\)) Tj T*
+(Built an end-to-end AI recruitment platform featuring coordinate-aware PDF parsing,) Tj T*
+(768-dimensional hybrid vector + BM25 search with Reciprocal Rank Fusion \(RRF\),) Tj T*
+(autonomous GitHub repository verification, and deterministic rubric scoring.) Tj T*
+() Tj T*
+(2. LinkUp Social Platform \(https://github.com/Faseehmasood/linkup\)) Tj T*
+(Engineered a full-stack social networking and real-time messaging application) Tj T*
+(with JWT authentication, media uploads, and responsive UI components.) Tj T*
+() Tj T*
+(3. Trading API Application \(https://github.com/Faseehmasood/trading-api-app\)) Tj T*
+(Developed high-reliability financial market data ingestion and REST API endpoints.) Tj T*
+() Tj T*
+(EXPERIENCE) Tj T*
+(Senior Full-Stack Developer | Tech Solutions Lab \(2023 - Present\)) Tj T*
+(- Designed and deployed scalable Next.js and Node.js microservices serving 10k+ users.) Tj T*
+(- Implemented Redis + BullMQ asynchronous worker pipelines and SHA-256 caching.) Tj T*
+(- Integrated automated GitHub code auditing and LLM structured JSON evaluation.) Tj T*
+() Tj T*
+(EDUCATION) Tj T*
+(Bachelor of Science in Computer Science \(BSCS\) | 2020 - 2024) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Annot /Subtype /Link /Rect [50 700 320 725] /Border [0 0 0] /A << /S /URI /URI (https://github.com/Faseehmasood) >> >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000257 00000 n 
+0000002657 00000 n 
+0000002727 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2871
+%%EOF
