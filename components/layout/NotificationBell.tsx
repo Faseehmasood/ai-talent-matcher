@@ -22,6 +22,7 @@ import {
   getMyNotificationsAction,
   markAsReadAction,
 } from "@/src/actions/notification.actions"
+import { subscribeToRealtimeSSE } from "@/src/lib/client-sse"
 import Link from "next/link"
 
 export function NotificationBell() {
@@ -45,82 +46,36 @@ export function NotificationBell() {
     }
   }, [])
 
-  // Subscribe to `/api/sse/events` instead of 5000ms setInterval polling
+  // Subscribe to shared `/api/sse/events` tab singleton instead of opening duplicate sockets
   useEffect(() => {
     if (!mounted) return
 
-    let eventSource: EventSource | null = null
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
-    let isUnmounted = false
-    let retryAttempt = 0
-
-    const connectSSE = () => {
-      if (isUnmounted) return
-
-      try {
-        const es = new EventSource("/api/sse/events")
-        eventSource = es
-
-        es.onopen = () => {
-          retryAttempt = 0
+    const unsubscribe = subscribeToRealtimeSSE((event) => {
+      if (event.type === "SNAPSHOT") {
+        if (Array.isArray(event.payload?.notifications)) {
+          setNotifications(event.payload.notifications)
         }
-
-        es.onmessage = (msg) => {
-          try {
-            const event = JSON.parse(msg.data)
-            if (!event || !event.type) return
-
-            if (event.type === "SNAPSHOT") {
-              if (Array.isArray(event.payload?.notifications)) {
-                setNotifications(event.payload.notifications)
-              }
-              if (typeof event.payload?.unreadCount === "number") {
-                setUnreadCount(event.payload.unreadCount)
-              }
-            } else if (event.type === "NOTIFICATION_CREATED") {
-              const incoming = event.payload?.notification
-              if (incoming && incoming._id) {
-                setNotifications((prev) => {
-                  const deduplicated = prev.filter(
-                    (n) => n._id !== incoming._id
-                  )
-                  return [incoming, ...deduplicated].slice(0, 10)
-                })
-              }
-              if (typeof event.payload?.unreadCount === "number") {
-                setUnreadCount(event.payload.unreadCount)
-              } else {
-                setUnreadCount((prev) => prev + 1)
-              }
-            }
-          } catch {
-            // Ignore malformed SSE payload
-          }
+        if (typeof event.payload?.unreadCount === "number") {
+          setUnreadCount(event.payload.unreadCount)
         }
-
-        es.onerror = () => {
-          es.close()
-          if (!isUnmounted) {
-            retryAttempt += 1
-            const delayMs = Math.min(30000, 1500 * Math.pow(1.6, retryAttempt))
-            reconnectTimer = setTimeout(connectSSE, delayMs)
-          }
+      } else if (event.type === "NOTIFICATION_CREATED") {
+        const incoming = event.payload?.notification
+        if (incoming && incoming._id) {
+          setNotifications((prev) => {
+            const deduplicated = prev.filter((n) => n._id !== incoming._id)
+            return [incoming, ...deduplicated].slice(0, 10)
+          })
         }
-      } catch {
-        fetchNotifications()
+        if (typeof event.payload?.unreadCount === "number") {
+          setUnreadCount(event.payload.unreadCount)
+        } else {
+          setUnreadCount((prev) => prev + 1)
+        }
       }
-    }
-
-    connectSSE()
+    })
 
     return () => {
-      isUnmounted = true
-      if (reconnectTimer) {
-        clearTimeout(reconnectTimer)
-      }
-      if (eventSource) {
-        eventSource.close()
-      }
+      unsubscribe()
     }
   }, [mounted, fetchNotifications])
 

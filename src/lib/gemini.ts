@@ -1,8 +1,14 @@
-import { GoogleGenAI } from "@google/genai"
+import { GoogleGenAI, GenerateContentParameters, GenerateContentResponse } from "@google/genai"
 
-export const EMBEDDING_MODEL_VERSION = "text-embedding-004"
+export const EMBEDDING_MODEL_VERSION = "gemini-embedding-001"
 export const EMBEDDING_DIMENSIONS = 768
-export const FAST_GENERATION_MODEL = "gemini-2.5-flash"
+export const FAST_GENERATION_MODEL = "gemini-3.5-flash-lite"
+export const GENERATION_MODEL_FALLBACKS = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash",
+  "gemini-3.6-flash",
+] as const
 
 export type EmbeddingTaskType = "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY"
 
@@ -118,8 +124,47 @@ export async function withRetryAndTimeout<T>(
 }
 
 /**
+ * Executes `ai.models.generateContent` across the ordered Flash model fallback chain
+ * (`gemini-3.5-flash-lite` -> `gemini-3.1-flash-lite` -> `gemini-3.5-flash` -> `gemini-3.6-flash`)
+ * so temporary 503 demand spikes or 404 deprecations fail over seamlessly without degrading
+ * to offline heuristics.
+ */
+export async function generateContentWithFallback(
+  params: Omit<GenerateContentParameters, "model">,
+  options: { timeoutMs?: number; maxRetriesPerModel?: number } = {}
+): Promise<GenerateContentResponse> {
+  const ai = getGenAIClient()
+  const timeoutMs = options.timeoutMs ?? 15000
+  const maxRetriesPerModel = options.maxRetriesPerModel ?? 0
+  let lastError: unknown
+
+  for (const model of GENERATION_MODEL_FALLBACKS) {
+    try {
+      return await withRetryAndTimeout(
+        async (signal) =>
+          await ai.models.generateContent({
+            ...params,
+            model,
+            config: {
+              ...params.config,
+              abortSignal: signal,
+            },
+          }),
+        { timeoutMs, maxRetries: maxRetriesPerModel }
+      )
+    } catch (error) {
+      lastError = error
+      const msg = error instanceof Error ? error.message : String(error)
+      console.warn(`[Gemini Fallback] Model ${model} failed (${msg.slice(0, 120)}); trying next model...`)
+    }
+  }
+
+  throw lastError
+}
+
+/**
  * Embeds one or more text chunks into 768-dimensional L2-normalized vectors
- * using Google's text-embedding-004 model.
+ * using Google's gemini-embedding-001 model.
  */
 export async function embedTextChunks(
   texts: string[],

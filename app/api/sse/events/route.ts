@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(req: NextRequest) {
-  const session = await verifySession()
+  const session = await verifySession(undefined, req)
   if (!session.success) {
     return new Response(
       JSON.stringify({ success: false, message: session.message }),

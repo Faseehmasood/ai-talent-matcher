@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { ApplicationDetailModal } from "./ApplicationDetailModal"
 import { retriggerAIAnalysisAction } from "@/src/actions/application.actions"
+import { subscribeToRealtimeSSE } from "@/src/lib/client-sse"
 
 interface RecentApplicationsProps {
   applications: any[]
@@ -44,84 +45,52 @@ export function RecentApplications({ applications }: RecentApplicationsProps) {
     setRows(applications || [])
   }, [applications])
 
-  // Subscribe to `/api/sse/events` for live stage transitions and score updates
+  // Subscribe to shared `/api/sse/events` hub for live stage transitions and score updates
   useEffect(() => {
-    let eventSource: EventSource | null = null
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
-    let isUnmounted = false
+    const unsubscribe = subscribeToRealtimeSSE(
+      (event) => {
+        if (!event?.type || !event?.payload?.applicationId) return
+        const targetId = String(event.payload.applicationId)
 
-    const connectSSE = () => {
-      if (isUnmounted) return
-      try {
-        const es = new EventSource("/api/sse/events")
-        eventSource = es
-
-        es.onopen = () => {
-          setSseConnected(true)
-        }
-
-        es.onmessage = (msg) => {
-          try {
-            const event = JSON.parse(msg.data)
-            if (!event?.type || !event?.payload?.applicationId) return
-            const targetId = String(event.payload.applicationId)
-
-            if (
-              event.type === "AI_PIPELINE_PROGRESS" ||
-              event.type === "AI_PIPELINE_COMPLETED" ||
-              event.type === "AI_PIPELINE_FAILED"
-            ) {
-              setRows((prev) =>
-                prev.map((app) => {
-                  if (String(app._id) !== targetId) return app
-                  return {
-                    ...app,
-                    aiProcessing:
-                      event.payload.aiProcessing || app.aiProcessing,
-                    ...(typeof event.payload.matchScore === "number"
-                      ? { matchScore: event.payload.matchScore }
-                      : {}),
-                    ...(event.payload.aiAnalysis
-                      ? { aiAnalysis: event.payload.aiAnalysis }
-                      : {}),
-                    ...(event.payload.githubVerification
-                      ? {
-                          githubVerification: event.payload.githubVerification,
-                        }
-                      : {}),
-                  }
-                })
-              )
-              if (
-                event.type === "AI_PIPELINE_COMPLETED" ||
-                event.type === "AI_PIPELINE_FAILED"
-              ) {
-                setTriggeringIds((prev) => ({ ...prev, [targetId]: false }))
+        if (
+          event.type === "AI_PIPELINE_PROGRESS" ||
+          event.type === "AI_PIPELINE_COMPLETED" ||
+          event.type === "AI_PIPELINE_FAILED"
+        ) {
+          setRows((prev) =>
+            prev.map((app) => {
+              if (String(app._id) !== targetId) return app
+              return {
+                ...app,
+                aiProcessing:
+                  event.payload.aiProcessing || app.aiProcessing,
+                ...(typeof event.payload.matchScore === "number"
+                  ? { matchScore: event.payload.matchScore }
+                  : {}),
+                ...(event.payload.aiAnalysis
+                  ? { aiAnalysis: event.payload.aiAnalysis }
+                  : {}),
+                ...(event.payload.githubVerification
+                  ? {
+                      githubVerification: event.payload.githubVerification,
+                    }
+                  : {}),
               }
-            }
-          } catch {
-            // Ignore malformed SSE event
+            })
+          )
+          if (
+            event.type === "AI_PIPELINE_COMPLETED" ||
+            event.type === "AI_PIPELINE_FAILED"
+          ) {
+            setTriggeringIds((prev) => ({ ...prev, [targetId]: false }))
           }
         }
-
-        es.onerror = () => {
-          setSseConnected(false)
-          es.close()
-          if (!isUnmounted) {
-            reconnectTimer = setTimeout(connectSSE, 3000)
-          }
-        }
-      } catch {
-        setSseConnected(false)
-      }
-    }
-
-    connectSSE()
+      },
+      (connected) => setSseConnected(connected)
+    )
 
     return () => {
-      isUnmounted = true
-      if (reconnectTimer) clearTimeout(reconnectTimer)
-      if (eventSource) eventSource.close()
+      unsubscribe()
     }
   }, [])
 

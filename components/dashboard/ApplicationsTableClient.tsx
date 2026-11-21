@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { Github } from "@/components/ui/github-icon"
 import { retriggerAIAnalysisAction } from "@/src/actions/application.actions"
+import { subscribeToRealtimeSSE } from "@/src/lib/client-sse"
 
 const STAGE_LABELS: Record<string, string> = {
   QUEUED: "Queued (5%)",
@@ -50,93 +51,61 @@ export function ApplicationsTableClient({
     setApplications(initialApplications || [])
   }, [initialApplications])
 
-  // Subscribe to `/api/sse/events` for real-time 5-stage progress bars & score updates
+  // Subscribe to shared `/api/sse/events` hub for real-time 5-stage progress bars & score updates
   useEffect(() => {
-    let eventSource: EventSource | null = null
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
-    let isUnmounted = false
+    const unsubscribe = subscribeToRealtimeSSE(
+      (event) => {
+        if (!event?.type || !event?.payload?.applicationId) return
+        const targetId = String(event.payload.applicationId)
 
-    const connectSSE = () => {
-      if (isUnmounted) return
-      try {
-        const es = new EventSource("/api/sse/events")
-        eventSource = es
-
-        es.onopen = () => {
-          setSseConnected(true)
-        }
-
-        es.onmessage = (msg) => {
-          try {
-            const event = JSON.parse(msg.data)
-            if (!event?.type || !event?.payload?.applicationId) return
-            const targetId = String(event.payload.applicationId)
-
-            if (
-              event.type === "AI_PIPELINE_PROGRESS" ||
-              event.type === "AI_PIPELINE_COMPLETED" ||
-              event.type === "AI_PIPELINE_FAILED"
-            ) {
-              setApplications((prev) => {
-                const updated = prev.map((app) => {
-                  if (String(app._id) !== targetId) return app
-                  const nextGh =
-                    event.payload.githubVerification || app.githubVerification
-                  return {
-                    ...app,
-                    aiProcessing:
-                      event.payload.aiProcessing || app.aiProcessing,
-                    ...(typeof event.payload.matchScore === "number"
-                      ? { matchScore: event.payload.matchScore }
-                      : {}),
-                    ...(event.payload.aiAnalysis
-                      ? { aiAnalysis: event.payload.aiAnalysis }
-                      : {}),
-                    ...(nextGh ? { githubVerification: nextGh } : {}),
-                    ...(nextGh?.githubUsername
-                      ? { extractedGithubUsername: nextGh.githubUsername }
-                      : {}),
-                  }
-                })
-
-                if (event.type === "AI_PIPELINE_COMPLETED") {
-                  return [...updated].sort(
-                    (a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1)
-                  )
-                }
-                return updated
-              })
-
-              if (
-                event.type === "AI_PIPELINE_COMPLETED" ||
-                event.type === "AI_PIPELINE_FAILED"
-              ) {
-                setTriggeringIds((prev) => ({ ...prev, [targetId]: false }))
+        if (
+          event.type === "AI_PIPELINE_PROGRESS" ||
+          event.type === "AI_PIPELINE_COMPLETED" ||
+          event.type === "AI_PIPELINE_FAILED"
+        ) {
+          setApplications((prev) => {
+            const updated = prev.map((app) => {
+              if (String(app._id) !== targetId) return app
+              const nextGh =
+                event.payload.githubVerification || app.githubVerification
+              return {
+                ...app,
+                aiProcessing:
+                  event.payload.aiProcessing || app.aiProcessing,
+                ...(typeof event.payload.matchScore === "number"
+                  ? { matchScore: event.payload.matchScore }
+                  : {}),
+                ...(event.payload.aiAnalysis
+                  ? { aiAnalysis: event.payload.aiAnalysis }
+                  : {}),
+                ...(nextGh ? { githubVerification: nextGh } : {}),
+                ...(nextGh?.githubUsername
+                  ? { extractedGithubUsername: nextGh.githubUsername }
+                  : {}),
               }
+            })
+
+            if (event.type === "AI_PIPELINE_COMPLETED") {
+              return [...updated].sort(
+                (a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1)
+              )
             }
-          } catch {
-            // Ignore malformed SSE payload
+            return updated
+          })
+
+          if (
+            event.type === "AI_PIPELINE_COMPLETED" ||
+            event.type === "AI_PIPELINE_FAILED"
+          ) {
+            setTriggeringIds((prev) => ({ ...prev, [targetId]: false }))
           }
         }
-
-        es.onerror = () => {
-          setSseConnected(false)
-          es.close()
-          if (!isUnmounted) {
-            reconnectTimer = setTimeout(connectSSE, 3000)
-          }
-        }
-      } catch {
-        setSseConnected(false)
-      }
-    }
-
-    connectSSE()
+      },
+      (connected) => setSseConnected(connected)
+    )
 
     return () => {
-      isUnmounted = true
-      if (reconnectTimer) clearTimeout(reconnectTimer)
-      if (eventSource) eventSource.close()
+      unsubscribe()
     }
   }, [])
 

@@ -16,6 +16,15 @@ interface Job {
   jobType: string
 }
 
+function formatSalaryBound(val?: number): string {
+  if (typeof val !== "number" || !Number.isFinite(val)) return "0"
+  if (val >= 1000) {
+    const inK = val / 1000
+    return Number.isInteger(inK) ? `${inK}k` : `${inK.toFixed(1)}k`
+  }
+  return `${val}k`
+}
+
 export default function HomeClient({ jobs }: { jobs: Job[] }) {
   const [introComplete, setIntroComplete] = useState(false)
 
@@ -121,7 +130,7 @@ export default function HomeClient({ jobs }: { jobs: Job[] }) {
                     <div className="flex items-center gap-6 w-full md:w-auto justify-between border-t md:border-t-0 pt-4 md:pt-0">
                       <div className="text-left md:text-right">
                         <p className="text-lg font-black text-foreground">
-                          {job.salary?.min}k — {job.salary?.max}k {job.salary?.currency}
+                          {formatSalaryBound(job.salary?.min)} — {formatSalaryBound(job.salary?.max)} {job.salary?.currency}
                         </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{job.jobType}</p>
                       </div>

@@ -17,7 +17,14 @@ export default async function AdminUsersPage() {
   const response = await getAllUsersAction();
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED" || response.code === "FORBIDDEN") redirect("/login");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/login");
+    }
     throw new Error("Failed to load users");
   }
 

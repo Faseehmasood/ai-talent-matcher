@@ -6,9 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export const revalidate = 0;
 
 export default async function ArchivedCandidatesPage() {
   const response = await getAllCandidatesAction("", true);
+  if (!response.success) {
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/hr/login");
+    }
+    throw new Error("Failed to load archived candidates");
+  }
   const candidates = response.candidates || [];
 
   return (

@@ -24,6 +24,9 @@ export async function proxy(req: NextRequest) {
     if (accessToken) {
       try {
         const { payload } = await jwtVerify(accessToken, JWT_SECRET)
+        if (payload.needsRoleSelection === true) {
+          return NextResponse.redirect(new URL("/select-role", req.url))
+        }
         const role = payload.role as string
         if (role === "admin")
           return NextResponse.redirect(new URL("/admin/dashboard", req.url))
@@ -37,13 +40,16 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
+  const isDynamicAccountRoute = /^\/[^/]+\/(profile|settings)(\/|$)/.test(pathname)
+
   const isProtectedPath =
     (pathname.startsWith("/hr") &&
       pathname !== "/hr/login" &&
       pathname !== "/hr-login") ||
     pathname.startsWith("/admin") ||
     (pathname.startsWith("/candidate") && pathname !== "/candidate/login") ||
-    pathname === "/select-role"
+    pathname === "/select-role" ||
+    isDynamicAccountRoute
 
   if (isProtectedPath) {
     if (!accessToken && !refreshToken) {
@@ -61,6 +67,7 @@ export async function proxy(req: NextRequest) {
       try {
         const { payload } = await jwtVerify(accessToken, JWT_SECRET)
         const userRole = payload.role as string
+        const needsRoleSelection = payload.needsRoleSelection === true
 
         const roleHome =
           userRole === "admin"
@@ -68,6 +75,25 @@ export async function proxy(req: NextRequest) {
             : userRole === "hr"
             ? "/hr/dashboard"
             : "/candidate/dashboard"
+
+        // Enforce Google OAuth onboarding gate before entering any dashboard
+        if (needsRoleSelection && pathname !== "/select-role") {
+          return NextResponse.redirect(new URL("/select-role", req.url))
+        }
+        if (!needsRoleSelection && pathname === "/select-role") {
+          return NextResponse.redirect(new URL(roleHome, req.url))
+        }
+
+        // Enforce valid role segment on dynamic /[role]/profile and /[role]/settings routes
+        if (isDynamicAccountRoute) {
+          const [, segment, section] = pathname.split("/")
+          if (segment !== userRole) {
+            return NextResponse.redirect(
+              new URL(`/${userRole}/${section}`, req.url)
+            )
+          }
+          return NextResponse.next()
+        }
 
         if (pathname.startsWith("/admin") && userRole !== "admin") {
           return NextResponse.redirect(new URL(roleHome, req.url))

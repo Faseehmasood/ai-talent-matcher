@@ -42,7 +42,10 @@ export function CreateJobModal() {
         max: Number(formData.maxSalary),
         currency: "PKR"
       },
-      skills: formData.skills.split(",").map(s => s.trim())
+      skills: formData.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     }
 
     const response = await createJobAction(finalData)

@@ -172,12 +172,14 @@ export async function signAccessAndRefreshTokens(user: {
   email: string
   role: string
   name?: string
+  needsRoleSelection?: boolean
 }): Promise<{ accessToken: string; refreshToken: string }> {
   const accessToken = await new SignJWT({
     _id: user._id.toString(),
     email: user.email,
     role: user.role,
     name: user.name || "",
+    needsRoleSelection: Boolean(user.needsRoleSelection),
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

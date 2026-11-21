@@ -110,7 +110,7 @@ export default async function PublicJobsPage({
                   </CardContent>
                   <CardFooter className="bg-muted/20 p-4 border-t border-border">
                     <Button asChild className="w-full rounded-2xl h-11 font-bold group/btn shadow-md">
-                      <Link href={`/candidate/jobs/${job._id}`}>
+                      <Link href="/candidate/jobs">
                         Apply Now{" "}
                         <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
                       </Link>

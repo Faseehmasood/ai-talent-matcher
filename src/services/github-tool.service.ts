@@ -154,46 +154,83 @@ export function cleanGithubUsername(raw: string | null | undefined): string {
   return cleaned.trim().replace(/^-+|-+$/g, "")
 }
 
+const THIRD_PARTY_ORG_NAMES = new Set([
+  "vercel",
+  "facebook",
+  "meta",
+  "google",
+  "googleapis",
+  "microsoft",
+  "nodejs",
+  "nextjs",
+  "reactjs",
+  "tailwindlabs",
+  "shadcn-ui",
+  "radix-ui",
+  "mongodb",
+  "redis",
+  "taskforcesh",
+  "expressjs",
+  "nestjs",
+  "prisma",
+  "docker",
+  "kubernetes",
+  "apache",
+  "openai",
+  "anthropics",
+])
+
 /**
  * Deterministically extracts a candidate's GitHub handle from visible PDF text
  * and extracted PDF /Annots /URI hyperlink annotations.
+ * Prioritizes root profile URLs (`github.com/username`) and explicit `GitHub:` labels
+ * over deep repository URLs, and deprioritizes well-known third-party library orgs.
  */
 export function extractGithubHandle(
   text: string,
   annotations: string[] = []
 ): string | null {
-  const candidates: string[] = []
-  const urlRegex = /github\.com\/([a-zA-Z0-9-]{1,39})(?:\/|\?|#|$)/gi
+  const highPriority: string[] = []
+  const mediumPriority: string[] = []
+  const lowPriority: string[] = []
 
-  for (const uri of annotations) {
-    if (!uri) continue
-    const matches = uri.matchAll(urlRegex)
-    for (const match of matches) {
-      if (match[1]) {
-        candidates.push(match[1])
+  const classifyUrl = (urlStr: string) => {
+    const fullMatches = urlStr.matchAll(
+      /github\.com\/([a-zA-Z0-9-]{1,39})(?:\/([^/?#\s]+))?/gi
+    )
+    for (const match of fullMatches) {
+      const user = match[1]
+      const repoSeg = match[2]
+      if (!user) continue
+      if (THIRD_PARTY_ORG_NAMES.has(user.toLowerCase())) {
+        lowPriority.push(user)
+      } else if (!repoSeg) {
+        // Root profile link like https://github.com/Faseehmasood
+        highPriority.push(user)
+      } else {
+        mediumPriority.push(user)
       }
     }
+  }
+
+  for (const uri of annotations) {
+    if (uri) classifyUrl(uri)
   }
 
   if (text) {
-    const textUrlMatches = text.matchAll(urlRegex)
-    for (const match of textUrlMatches) {
-      if (match[1]) {
-        candidates.push(match[1])
-      }
-    }
-
     const explicitHandleRegex =
       /\bgithub(?:\s+(?:username|handle|profile|id))?\s*[:\-@]\s*@?([a-zA-Z0-9-]{2,39})\b/gi
-    const handleMatches = text.matchAll(explicitHandleRegex)
-    for (const match of handleMatches) {
+    for (const match of text.matchAll(explicitHandleRegex)) {
       if (match[1]) {
-        candidates.push(match[1])
+        highPriority.push(match[1])
       }
     }
+    classifyUrl(text)
   }
 
-  for (const raw of candidates) {
+  const orderedCandidates = [...highPriority, ...mediumPriority, ...lowPriority]
+
+  for (const raw of orderedCandidates) {
     const cleaned = raw.trim().replace(/^-+|-+$/g, "")
     if (
       cleaned.length >= 2 &&
@@ -239,7 +276,7 @@ async function githubApiGet<T>(url: string): Promise<{
     "X-GitHub-Api-Version": "2022-11-28",
   }
 
-  const pat = process.env.GITHUB_PAT?.trim()
+  const pat = (process.env.GITHUB_PAT || process.env.GITHUB_TOKEN)?.trim()
   if (pat) {
     headers.Authorization = `Bearer ${pat}`
   }

@@ -30,7 +30,14 @@ export default async function HRCandidatesPage({
   const response = await getAllCandidatesAction(query);
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED") redirect("/hr/login");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/hr/login");
+    }
     throw new Error("Failed to load candidates");
   }
 

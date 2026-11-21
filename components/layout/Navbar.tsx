@@ -28,20 +28,23 @@ export function Navbar() {
 
   useEffect(() => {
     let active = true
-    if (!user) {
-      fetch("/api/auth/me", { credentials: "include" })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (active && data?.success && data.user) {
-            setAuth(data.user)
-          }
-        })
-        .catch(() => {})
-    }
+    fetch("/api/auth/me", { credentials: "include" })
+      .then(async (res) => {
+        if (!active) return
+        if (res.status === 401 || res.status === 403) {
+          logout()
+          return
+        }
+        const data = await res.json().catch(() => null)
+        if (active && data?.success && data.user) {
+          setAuth(data.user)
+        }
+      })
+      .catch(() => {})
     return () => {
       active = false
     }
-  }, [user, setAuth])
+  }, [setAuth, logout])
 
   const role = pathname.startsWith("/admin")
     ? "admin"

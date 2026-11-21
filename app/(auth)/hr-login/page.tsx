@@ -46,7 +46,9 @@ export default function HRLoginPage() {
       const response = await loginHRAction({ email, password })
       if (response.success && response.user) {
         setAuth(response.user as any)
-        router.push("/hr/dashboard")
+        router.push(
+          response.user.role === "admin" ? "/admin/dashboard" : "/hr/dashboard"
+        )
       } else {
         setErrorMessage(response.message || "Authentication failed")
       }

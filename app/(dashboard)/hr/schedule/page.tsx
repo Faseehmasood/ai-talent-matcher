@@ -12,7 +12,14 @@ export default async function HRSchedulePage() {
   const response = await getMyScheduleAction();
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED") redirect("/hr/login");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/hr/login");
+    }
     throw new Error("Failed to load schedule");
   }
 

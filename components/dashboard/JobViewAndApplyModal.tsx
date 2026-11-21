@@ -11,8 +11,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Github } from "@/components/ui/github-icon"
 import { 
   UploadCloud, 
   Send, 
@@ -28,6 +30,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [coverLetter, setCoverLetter] = useState("")
+  const [githubUrl, setGithubUrl] = useState("")
 
  
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +47,9 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
       const formData = new FormData()
       formData.append("jobId", job._id)
       formData.append("coverLetter", coverLetter)
+      if (githubUrl.trim()) {
+        formData.append("githubUrl", githubUrl.trim())
+      }
       formData.append("resume", file)
 
       const response = await applyForJobAction(formData)
@@ -53,6 +59,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
         setStep("view")
         setFile(null)
         setCoverLetter("")
+        setGithubUrl("")
         window.location.reload() 
       } else {
         alert(response.message || "Failed to apply. You might have already applied.")
@@ -69,6 +76,7 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
       setStep("view")
       setFile(null)
       setCoverLetter("")
+      setGithubUrl("")
     }}>
       <DialogTrigger asChild>
         <Button className="w-full rounded-2xl h-11 group/btn gap-2 shadow-lg shadow-primary/20 transition-all font-bold">
@@ -156,6 +164,19 @@ export function JobViewAndApplyModal({ job }: { job: any }) {
               </div>
 
                
+              <div className="space-y-2">
+                <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                  <Github className="w-3.5 h-3.5" /> GitHub Profile or Username (Optional)
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="https://github.com/username (auto-detected from PDF if omitted)"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  className="rounded-2xl h-11 border-border/60 focus-visible:ring-primary/20"
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Message to Recruiter</Label>
                 <Textarea 

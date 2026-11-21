@@ -213,18 +213,18 @@ export async function loginHRAction(formData: LoginInput) {
       }
     }
 
-    // Strict Role Enforcement: Only HR and Admin roles are permitted in the Recruiter Portal
+    const isMatch = await user.comparePassword(password)
+    if (!isMatch) {
+      return { success: false, message: "Invalid email or password!" }
+    }
+
+    // Strict Role Enforcement (checked AFTER password verification to prevent role/account enumeration)
     if (user.role !== "hr" && user.role !== "admin") {
       return {
         success: false,
         message:
           "Access Denied: This portal is strictly for HR Managers and Technical Recruiters. Please sign in via the Candidate Portal.",
       }
-    }
-
-    const isMatch = await user.comparePassword(password)
-    if (!isMatch) {
-      return { success: false, message: "Invalid email or password!" }
     }
 
     const { accessToken, refreshToken } = await signAccessAndRefreshTokens({

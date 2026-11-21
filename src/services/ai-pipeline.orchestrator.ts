@@ -1,5 +1,7 @@
 import mongoose from "mongoose"
 import connectDB from "@/src/lib/db"
+import "@/src/models/job.model"
+import "@/src/models/users.model"
 import { Application } from "@/src/models/application.model"
 import { ResumeChunk } from "@/src/models/resume-chunk.model"
 import {
@@ -201,14 +203,16 @@ export async function runApplicationAIPipeline(
       application.extractedGithubUsername || ""
     let ocrUsed = Boolean(application.ocrUsed)
 
-    // Check if chunks already exist in MongoDB when no new pdfBuffer is supplied
-    const existingStoredChunks = !options.pdfBuffer
-      ? await ResumeChunk.find({ candidateId: candidateDoc._id })
-          .sort({ chunkIndex: 1 })
-          .lean()
-      : []
+    // Only reuse chunks belonging to THIS specific application (prevents BullMQ worker / re-analyze
+    // from accidentally reading an older resume the candidate uploaded for a different job).
+    const existingStoredChunks =
+      !options.pdfBuffer && !options.forceRefresh
+        ? await ResumeChunk.find({ applicationId: application._id })
+            .sort({ chunkIndex: 1 })
+            .lean()
+        : []
 
-    if (!options.pdfBuffer && existingStoredChunks.length > 0) {
+    if (!options.pdfBuffer && !options.forceRefresh && existingStoredChunks.length > 0) {
       parsedChunks = existingStoredChunks.map((c) => ({
         sectionType: c.sectionType,
         chunkIndex: c.chunkIndex,
@@ -277,15 +281,20 @@ export async function runApplicationAIPipeline(
 
     let chunkEmbeddings: number[][] = []
     if (
+      !options.forceRefresh &&
       tier1Cached &&
       Array.isArray(tier1Cached.embeddings) &&
       tier1Cached.embeddings.length === parsedChunks.length
     ) {
       chunkEmbeddings = tier1Cached.embeddings
     } else if (
+      !options.forceRefresh &&
       existingStoredChunks.length === parsedChunks.length &&
       existingStoredChunks.every(
-        (c) => Array.isArray(c.embedding) && c.embedding.length === 768
+        (c) =>
+          c.embeddingModel === EMBEDDING_MODEL_VERSION &&
+          Array.isArray(c.embedding) &&
+          c.embedding.length === 768
       )
     ) {
       chunkEmbeddings = existingStoredChunks.map((c) => c.embedding)
@@ -295,7 +304,11 @@ export async function runApplicationAIPipeline(
           parsedChunks.map((c) => c.chunkText),
           "RETRIEVAL_DOCUMENT"
         )
-      } catch {
+      } catch (embedErr) {
+        console.warn(
+          "[AI Pipeline] Embedding generation failed:",
+          embedErr instanceof Error ? embedErr.message.slice(0, 150) : embedErr
+        )
         chunkEmbeddings = []
       }
     }

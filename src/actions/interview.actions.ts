@@ -3,6 +3,7 @@
 import connectDB from "@/src/lib/db"
 import { Interview } from "@/src/models/interview.model"
 import { Application } from "@/src/models/application.model"
+import { Job } from "@/src/models/job.model"
 import { connection } from "next/server"
 import { revalidatePath } from "next/cache"
 import { interviewSchema, InterviewInput } from "@/src/lib/validations"
@@ -26,7 +27,9 @@ export async function getMyScheduleAction() {
 
     await connectDB()
     const queryFilter =
-      session.user.role === "hr"
+      session.user.role === "admin"
+        ? {}
+        : session.user.role === "hr"
         ? { interviewer: session.user._id }
         : { candidate: session.user._id }
 
@@ -65,6 +68,36 @@ export async function createInterviewAction(interviewData: InterviewInput) {
     }
 
     await connectDB()
+
+    // Ownership & integrity verification (prevents IDOR across HR pipelines)
+    const job = await Job.findById(result.data.jobId).select("postedBy").lean()
+    if (!job) {
+      return { success: false, message: "Target job not found" }
+    }
+    if (
+      session.user.role !== "admin" &&
+      job.postedBy.toString() !== session.user._id
+    ) {
+      return {
+        success: false,
+        code: "FORBIDDEN",
+        message: "Forbidden: You do not own this job pipeline.",
+      }
+    }
+
+    const application = await Application.findOne({
+      job: result.data.jobId,
+      candidate: result.data.candidateId,
+    })
+      .select("_id")
+      .lean()
+    if (!application) {
+      return {
+        success: false,
+        message: "Candidate has not applied for this job.",
+      }
+    }
+
     const interview = await Interview.create({
       job: result.data.jobId,
       candidate: result.data.candidateId,
@@ -131,8 +164,12 @@ export async function updateInterviewStatusAction(
     }
 
     await connectDB()
+    const updateFilter =
+      session.user.role === "admin"
+        ? { _id: interviewId }
+        : { _id: interviewId, interviewer: session.user._id }
     const updated = await Interview.findOneAndUpdate(
-      { _id: interviewId, interviewer: session.user._id },
+      updateFilter,
       { $set: { status } },
       { new: true }
     ).populate("job")
@@ -184,10 +221,11 @@ export async function deleteInterviewAction(interviewId: string) {
     }
 
     await connectDB()
-    const deleted = await Interview.findOneAndDelete({
-      _id: interviewId,
-      interviewer: session.user._id,
-    })
+    const deleteFilter =
+      session.user.role === "admin"
+        ? { _id: interviewId }
+        : { _id: interviewId, interviewer: session.user._id }
+    const deleted = await Interview.findOneAndDelete(deleteFilter)
 
     if (!deleted) {
       return { success: false, code: "NOT_FOUND" }

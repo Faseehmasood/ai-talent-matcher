@@ -50,10 +50,11 @@ export async function deleteJobAction(jobId: string) {
     }
 
     await connectDB()
-    const deletedJob = await Job.findOneAndDelete({
-      _id: jobId,
-      postedBy: session.user._id,
-    })
+    const deleteFilter =
+      session.user.role === "admin"
+        ? { _id: jobId }
+        : { _id: jobId, postedBy: session.user._id }
+    const deletedJob = await Job.findOneAndDelete(deleteFilter)
 
     if (!deletedJob) {
       return { success: false, code: "NOT_FOUND" }

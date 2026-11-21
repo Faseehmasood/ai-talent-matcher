@@ -12,7 +12,12 @@ export default async function AdminJobsPage() {
 
   // 2. Security: Agar Admin nahi hai toh nikaal do 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED" || response.code === "FORBIDDEN") {
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
       redirect("/login");
     }
     throw new Error("Failed to fetch platform jobs");

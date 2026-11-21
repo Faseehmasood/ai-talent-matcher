@@ -95,6 +95,7 @@ export async function GET(req: NextRequest) {
       email: user.email,
       role: user.role,
       name: user.name,
+      needsRoleSelection: Boolean(user.needsRoleSelection),
     })
 
     user.refreshToken = refreshToken

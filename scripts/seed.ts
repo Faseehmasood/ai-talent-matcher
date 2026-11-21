@@ -28,7 +28,7 @@ import { ResumeChunk } from "../src/models/resume-chunk.model"
 
 /**
  * Generates an L2-normalized 768-dimension vector (||v|| = 1.0)
- * matching Google's text-embedding-004 specification.
+ * matching Google's gemini-embedding-001 (768-d) specification.
  */
 function generateUnitEmbedding(seedText: string): number[] {
   const vec: number[] = new Array(768).fill(0)
@@ -720,7 +720,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "Full-Stack Engineer React Next.js Supabase Docker JavaScript TypeScript PostgreSQL"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
     {
       candidateId: candAli._id,
@@ -735,7 +735,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "Technical Skills JavaScript TypeScript React Next.js Supabase Docker Node.js PostgreSQL Redis"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
     {
       candidateId: candMarcus._id,
@@ -750,7 +750,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "Full-Stack Web Developer Next.js Supabase React JavaScript SaaS REST API"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
     {
       candidateId: candZain._id,
@@ -766,7 +766,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "AI Research Engineer RAG PyTorch LLMs Vector Search Python FastAPI Docker"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
     {
       candidateId: candSarahC._id,
@@ -781,7 +781,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "Staff Frontend Engineer Next.js React TailwindCSS Framer Motion Design Systems TypeScript"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
     {
       candidateId: candDavid._id,
@@ -796,7 +796,7 @@ async function runSeed() {
       embedding: generateUnitEmbedding(
         "Distributed Systems Engineer Go Kafka Docker PostgreSQL gRPC Redis Microservices"
       ),
-      embeddingModel: "text-embedding-004",
+      embeddingModel: "gemini-embedding-001",
     },
   ]
 

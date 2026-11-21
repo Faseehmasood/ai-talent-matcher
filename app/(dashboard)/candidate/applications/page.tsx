@@ -11,7 +11,14 @@ export default async function CandidateApplicationsPage() {
   const response = await getMyApplicationsAction();
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED") redirect("/login");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/login");
+    }
     throw new Error("Failed to load applications");
   }
 

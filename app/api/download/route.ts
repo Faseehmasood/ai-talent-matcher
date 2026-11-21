@@ -19,12 +19,18 @@ export async function GET(req: NextRequest) {
   let fileUrl = searchParams.get("url")
   const appId = searchParams.get("id")
 
-  if (!fileUrl && appId) {
-    await connectDB()
-    const appDoc = await Application.findById(appId).select("resume").lean()
-    if (appDoc?.resume) {
-      fileUrl = appDoc.resume
-    }
+  await connectDB()
+
+  // Prefer direct lookup by application ID when supplied to prevent collisions if two applications share a URL
+  let application = appId
+    ? await Application.findById(appId)
+        .populate("candidate", "name")
+        .select("candidate job resume")
+        .lean()
+    : null
+
+  if (!fileUrl && application?.resume) {
+    fileUrl = application.resume
   }
 
   if (!fileUrl) {
@@ -60,11 +66,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await connectDB()
-    const application = await Application.findOne({ resume: fileUrl })
-      .populate("candidate", "name")
-      .select("candidate job")
-      .lean()
+    if (!application) {
+      application = await Application.findOne({ resume: fileUrl })
+        .populate("candidate", "name")
+        .select("candidate job resume")
+        .lean()
+    }
 
     if (!application) {
       return NextResponse.json(

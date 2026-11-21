@@ -9,6 +9,7 @@ interface GlobalRedisState {
   client: Redis | null
   connectionAttempted: boolean
   isHealthy: boolean
+  lastFailedAt: number
   memoryFallback: Map<string, MemoryCacheEntry>
 }
 
@@ -20,6 +21,7 @@ const globalRedis: GlobalRedisState = global.__redisSingleton ?? {
   client: null,
   connectionAttempted: false,
   isHealthy: false,
+  lastFailedAt: 0,
   memoryFallback: new Map<string, MemoryCacheEntry>(),
 }
 
@@ -29,6 +31,7 @@ if (!global.__redisSingleton) {
 
 const MAX_MEMORY_CACHE_ENTRIES = 1000
 const DEFAULT_TTL_SECONDS = 7 * 24 * 60 * 60 // 7 days
+const REDIS_RECONNECT_COOLDOWN_MS = 30_000 // Allow automatic recovery after 30s if Redis returns online
 
 /**
  * Evicts expired entries and enforces an upper bound on the in-memory fallback Map
@@ -62,10 +65,23 @@ export function getRedisClient(): Redis | null {
   }
 
   if (globalRedis.client) {
-    return globalRedis.client
+    if (
+      !globalRedis.isHealthy &&
+      globalRedis.client.status === "end" &&
+      Date.now() - globalRedis.lastFailedAt >= REDIS_RECONNECT_COOLDOWN_MS
+    ) {
+      globalRedis.client = null
+      globalRedis.connectionAttempted = false
+    } else {
+      return globalRedis.client
+    }
   }
 
-  if (globalRedis.connectionAttempted && !globalRedis.isHealthy) {
+  if (
+    globalRedis.connectionAttempted &&
+    !globalRedis.isHealthy &&
+    Date.now() - globalRedis.lastFailedAt < REDIS_RECONNECT_COOLDOWN_MS
+  ) {
     return null
   }
 
@@ -79,6 +95,7 @@ export function getRedisClient(): Redis | null {
       retryStrategy(times: number) {
         if (times > 3) {
           globalRedis.isHealthy = false
+          globalRedis.lastFailedAt = Date.now()
           return null
         }
         return Math.min(times * 250, 1500)
@@ -88,14 +105,17 @@ export function getRedisClient(): Redis | null {
     // Prevent unhandled "error" events from crashing the Next.js Node runtime
     client.on("error", () => {
       globalRedis.isHealthy = false
+      globalRedis.lastFailedAt = Date.now()
     })
 
     client.on("ready", () => {
       globalRedis.isHealthy = true
+      globalRedis.lastFailedAt = 0
     })
 
     client.on("end", () => {
       globalRedis.isHealthy = false
+      globalRedis.lastFailedAt = Date.now()
     })
 
     globalRedis.client = client
@@ -103,6 +123,7 @@ export function getRedisClient(): Redis | null {
   } catch {
     globalRedis.client = null
     globalRedis.isHealthy = false
+    globalRedis.lastFailedAt = Date.now()
     return null
   }
 }

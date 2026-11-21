@@ -12,7 +12,14 @@ export default async function CandidateSchedulePage() {
   const response = await getMyScheduleAction();
 
   if (!response.success) {
-    if (response.code === "UNAUTHORIZED") redirect("/login");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/login");
+    }
     throw new Error("Failed to load your schedule");
   }
 

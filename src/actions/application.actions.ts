@@ -38,6 +38,8 @@ export async function applyForJobAction(formData: FormData) {
 
     const jobId = formData.get("jobId") as string
     const coverLetter = (formData.get("coverLetter") as string) || ""
+    const rawGithubInput = (formData.get("githubUrl") as string) || ""
+    const cleanManualGithub = cleanGithubUsername(rawGithubInput)
     const resumeFile = formData.get("resume") as File | null
 
     if (!resumeFile) {
@@ -110,6 +112,7 @@ export async function applyForJobAction(formData: FormData) {
         resume: resumeUrl,
         coverLetter: result.data.coverLetter || "",
         resumeHash: binaryResumeHash,
+        extractedGithubUsername: cleanManualGithub || "",
         aiProcessing: initialAiProcessing,
       })
     } catch (dbErr: unknown) {
@@ -154,6 +157,7 @@ export async function applyForJobAction(formData: FormData) {
     // Trigger non-blocking async 5-stage AI pipeline (BullMQ + in-process serverless fallback)
     await enqueueApplicationAIPipeline(applicationId, {
       pdfBuffer: buffer,
+      manualGithubHandle: cleanManualGithub || undefined,
     })
 
     revalidatePath("/hr/applications")

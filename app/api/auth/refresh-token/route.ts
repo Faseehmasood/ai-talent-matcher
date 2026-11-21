@@ -20,8 +20,10 @@ export async function GET(req: NextRequest) {
       ? rawCallback
       : "/"
 
+  const loginFallback = safeCallback.startsWith("/hr") ? "/hr/login" : "/login"
+
   if (!refreshToken) {
-    return NextResponse.redirect(new URL("/login", req.url))
+    return NextResponse.redirect(new URL(loginFallback, req.url))
   }
 
   try {
@@ -47,6 +49,7 @@ export async function GET(req: NextRequest) {
         email: user.email,
         role: user.role,
         name: user.name,
+        needsRoleSelection: Boolean(user.needsRoleSelection),
       })
 
     user.refreshToken = newRefreshToken
@@ -56,7 +59,7 @@ export async function GET(req: NextRequest) {
     setAuthCookiesOnResponse(response, newAccessToken, newRefreshToken)
     return response
   } catch {
-    const response = NextResponse.redirect(new URL("/login", req.url))
+    const response = NextResponse.redirect(new URL(loginFallback, req.url))
     response.cookies.delete("accessToken")
     response.cookies.delete("refreshToken")
     return response

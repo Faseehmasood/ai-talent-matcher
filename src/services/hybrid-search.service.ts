@@ -55,7 +55,7 @@ const RRF_K = 60
 
 /**
  * Idempotently parses a PDF resume, checks for existing SHA-256 cached embeddings,
- * generates 768-d vectors via text-embedding-004 on cache miss, and stores ResumeChunks.
+ * generates 768-d vectors via gemini-embedding-001 on cache miss, and stores ResumeChunks.
  */
 export async function ingestCandidateResumeChunks(
   input: IngestResumeInput
@@ -383,8 +383,12 @@ export async function hybridCandidateSearch(params: {
     if (embedded.length > 0) {
       queryVector = embedded[0]
     }
-  } catch {
+  } catch (err) {
     // Graceful degradation to lexical BM25 if GEMINI_API_KEY is temporarily unreachable
+    console.warn(
+      "[Hybrid Search] Query embedding failed; falling back to BM25:",
+      err instanceof Error ? err.message.slice(0, 140) : err
+    )
     queryVector = null
   }
 

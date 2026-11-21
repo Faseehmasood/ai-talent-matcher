@@ -11,8 +11,15 @@ export default async function AdminAnalyticsPage() {
   const response = await getAdminAnalyticsAction();
 
   if (!response.success) {
-     if (response.code === "UNAUTHORIZED") redirect("/login");
-     throw new Error("Analytics failed to load");
+    if (
+      response.code === "UNAUTHORIZED" ||
+      response.code === "TOKEN_EXPIRED" ||
+      response.code === "ACCOUNT_SUSPENDED" ||
+      response.code === "FORBIDDEN"
+    ) {
+      redirect("/login");
+    }
+    throw new Error("Analytics failed to load");
   }
 
   return (

@@ -1,9 +1,7 @@
 import crypto from "crypto"
 import { validatePdfBuffer } from "@/src/lib/validations"
 import {
-  getGenAIClient,
-  FAST_GENERATION_MODEL,
-  withRetryAndTimeout,
+  generateContentWithFallback,
 } from "@/src/lib/gemini"
 import { ResumeSectionType } from "@/src/models/resume-chunk.model"
 import { extractGithubHandle } from "@/src/services/github-tool.service"
@@ -209,51 +207,47 @@ function reconstructCoordinateAwarePageText(
 }
 
 /**
- * Fallback multimodal OCR using gemini-2.5-flash when a PDF has < 150 chars/page
+ * Fallback multimodal OCR using Gemini Flash when a PDF has < 150 chars/page
  * (e.g., scanned image PDF or Canva/Figma vectorized outline PDF).
  */
 async function extractResumeViaMultimodalVision(buffer: Buffer): Promise<{
   text: string
   links: string[]
 }> {
-  const ai = getGenAIClient()
   const base64Pdf = buffer.toString("base64")
 
-  const response = await withRetryAndTimeout(
-    async (signal) =>
-      await ai.models.generateContent({
-        model: FAST_GENERATION_MODEL,
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                inlineData: {
-                  mimeType: "application/pdf",
-                  data: base64Pdf,
-                },
+  const response = await generateContentWithFallback(
+    {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType: "application/pdf",
+                data: base64Pdf,
               },
-              {
-                text: [
-                  "Extract all text from this PDF resume accurately, preserving the logical reading order of sections.",
-                  "Format the output using exact uppercase section headers on their own lines:",
-                  "SUMMARY",
-                  "EXPERIENCE",
-                  "PROJECTS",
-                  "SKILLS",
-                  "EDUCATION",
-                  "Also include any visible URLs, email addresses, or GitHub usernames verbatim.",
-                ].join("\n"),
-              },
-            ],
-          },
-        ],
-        config: {
-          temperature: 0.1,
-          abortSignal: signal,
+            },
+            {
+              text: [
+                "Extract all text from this PDF resume accurately, preserving the logical reading order of sections.",
+                "Format the output using exact uppercase section headers on their own lines:",
+                "SUMMARY",
+                "EXPERIENCE",
+                "PROJECTS",
+                "SKILLS",
+                "EDUCATION",
+                "Also include any visible URLs, email addresses, or GitHub usernames verbatim.",
+              ].join("\n"),
+            },
+          ],
         },
-      }),
-    { timeoutMs: 25000, maxRetries: 2 }
+      ],
+      config: {
+        temperature: 0.1,
+      },
+    },
+    { timeoutMs: 25000, maxRetriesPerModel: 1 }
   )
 
   const extractedText = (response.text || "").trim()
@@ -349,7 +343,7 @@ export function buildSectionAwareChunks(
 
 /**
  * End-to-end coordinate-aware PDF parser with /Annots hyperlink extraction,
- * multimodal gemini-2.5-flash OCR fallback, and section-aware chunking.
+ * multimodal Gemini Flash OCR fallback, and section-aware chunking.
  */
 export async function parseResumePdf(
   buffer: Buffer,
